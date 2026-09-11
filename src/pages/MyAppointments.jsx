@@ -480,7 +480,8 @@ export default function MyAppointments() {
                   )}
 
                   {/* Section 2: Past Appointments (Token No. preserved, Status dropdown filter & pagination) */}
-                  <div className="appointments-section-card">
+                  {activeSubTab !== 'upcoming' && (
+                    <div className="appointments-section-card">
                       <div className="section-card-header">
                         <div className="section-header-info">
                           <div className="section-icon-badge">
@@ -637,6 +638,7 @@ export default function MyAppointments() {
                         </div>
                       </div>
                     </div>
+                  )}
                 </>
               )}
 
