@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 export default function MyAppointments() {
   // Navigation State
   const [activeMenu, setActiveMenu] = useState('opd'); // 'opd', 'lab', 'radiology'
-  const [activeSubTab, setActiveSubTab] = useState('all'); // 'all', 'upcoming', 'completed', 'cancelled'
+  const [activeSubTab, setActiveSubTab] = useState('upcoming'); // 'upcoming', 'completed', 'cancelled'
   const [pastFilter, setPastFilter] = useState('all'); // 'all', 'completed', 'cancelled'
 
   // Modal States
@@ -252,137 +252,134 @@ export default function MyAppointments() {
 
       {/* Main Container */}
       <div className="appointments-container">
-        <div className="row g-4">
+        <div className="appointments-layout-grid">
           {/* Left Menu Sidebar */}
-          <div className="col-lg-3 col-md-4">
-            <div className="appointments-sidebar-card">
-              <h2 className="sidebar-heading">
-                <i className="fas fa-calendar-check text-primary"></i> My Appointments
-              </h2>
-              <ul className="sidebar-nav-list">
-                <li>
-                  <button
-                    className={`sidebar-nav-btn ${activeMenu === 'opd' ? 'active' : ''}`}
-                    onClick={() => setActiveMenu('opd')}
-                    type="button"
-                  >
-                    <span className="sidebar-item-left">
-                      <span className="sidebar-item-icon">
-                        <i className="fas fa-stethoscope"></i>
-                      </span>
-                      <span>OPD Consultations</span>
+          <div className="appointments-sidebar-card">
+            <h2 className="sidebar-heading">
+              <i className="fas fa-calendar-check text-primary"></i> My Appointments
+            </h2>
+            <ul className="sidebar-nav-list">
+              <li>
+                <button
+                  className={`sidebar-nav-btn ${activeMenu === 'opd' ? 'active' : ''}`}
+                  onClick={() => setActiveMenu('opd')}
+                  type="button"
+                >
+                  <span className="sidebar-item-left">
+                    <span className="sidebar-item-icon">
+                      <i className="fas fa-stethoscope"></i>
                     </span>
-                    <span className="sidebar-badge">{upcomingAppointments.length}</span>
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`sidebar-nav-btn ${activeMenu === 'lab' ? 'active' : ''}`}
-                    onClick={() => setActiveMenu('lab')}
-                    type="button"
-                  >
-                    <span className="sidebar-item-left">
-                      <span className="sidebar-item-icon">
-                        <i className="fas fa-flask"></i>
-                      </span>
-                      <span>Lab Appointments</span>
+                    <span>OPD Consultations</span>
+                  </span>
+                  <span className="sidebar-badge">{upcomingAppointments.length}</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`sidebar-nav-btn ${activeMenu === 'lab' ? 'active' : ''}`}
+                  onClick={() => setActiveMenu('lab')}
+                  type="button"
+                >
+                  <span className="sidebar-item-left">
+                    <span className="sidebar-item-icon">
+                      <i className="fas fa-flask"></i>
                     </span>
-                    <span className="sidebar-badge">{labAppointments.length}</span>
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`sidebar-nav-btn ${activeMenu === 'radiology' ? 'active' : ''}`}
-                    onClick={() => setActiveMenu('radiology')}
-                    type="button"
-                  >
-                    <span className="sidebar-item-left">
-                      <span className="sidebar-item-icon">
-                        <i className="fas fa-x-ray"></i>
-                      </span>
-                      <span>Radiology Appointments</span>
+                    <span>Lab Appointments</span>
+                  </span>
+                  <span className="sidebar-badge">{labAppointments.length}</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`sidebar-nav-btn ${activeMenu === 'radiology' ? 'active' : ''}`}
+                  onClick={() => setActiveMenu('radiology')}
+                  type="button"
+                >
+                  <span className="sidebar-item-left">
+                    <span className="sidebar-item-icon">
+                      <i className="fas fa-x-ray"></i>
                     </span>
-                    <span className="sidebar-badge">{radiologyAppointments.length}</span>
-                  </button>
-                </li>
-              </ul>
-            </div>
+                    <span>Radiology Appointments</span>
+                  </span>
+                  <span className="sidebar-badge">{radiologyAppointments.length}</span>
+                </button>
+              </li>
+            </ul>
           </div>
 
           {/* Right Main Content Area */}
-          <div className="col-lg-9 col-md-8">
-            <div className="appointments-main-content">
-              {/* VIEW 1: OPD CONSULTATIONS */}
-              {activeMenu === 'opd' && (
-                <>
-                  {/* Header and Sub-tabs */}
-                  <div className="appointments-header-row">
-                    <h1 className="appointments-page-title">OPD Consultations</h1>
-                    <div className="appointment-subtabs">
-                      <button
-                        className={`subtab-btn ${activeSubTab === 'upcoming' || activeSubTab === 'all' ? 'active' : ''}`}
-                        onClick={() => setActiveSubTab(activeSubTab === 'upcoming' ? 'all' : 'upcoming')}
-                        type="button"
-                      >
-                        <i className="fas fa-calendar-alt"></i>
-                        Upcoming ({upcomingAppointments.length})
-                      </button>
-                      <button
-                        className={`subtab-btn ${activeSubTab === 'completed' ? 'active' : ''}`}
-                        onClick={() => setActiveSubTab('completed')}
-                        type="button"
-                      >
-                        <i className="fas fa-check-circle"></i>
-                        Completed ({pastAppointments.filter(a => a.status === 'completed').length})
-                      </button>
-                      <button
-                        className={`subtab-btn ${activeSubTab === 'cancelled' ? 'active' : ''}`}
-                        onClick={() => setActiveSubTab('cancelled')}
-                        type="button"
-                      >
-                        <i className="fas fa-ban"></i>
-                        Cancelled ({pastAppointments.filter(a => a.status === 'cancelled').length})
-                      </button>
-                      {activeSubTab !== 'all' && (
-                        <button
-                          className="subtab-btn text-muted ms-auto"
-                          onClick={() => setActiveSubTab('all')}
-                          type="button"
-                        >
-                          <i className="fas fa-list"></i> View All
-                        </button>
-                      )}
-                    </div>
+          <div className="appointments-main-content">
+            {/* VIEW 1: OPD CONSULTATIONS */}
+            {activeMenu === 'opd' && (
+              <>
+                {/* Header and Sub-tabs */}
+                <div className="appointments-header-row">
+                  <h1 className="appointments-page-title">OPD Consultations</h1>
+                  <div className="appointment-subtabs">
+                    <button
+                      className={`subtab-btn ${activeSubTab === 'upcoming' ? 'active' : ''}`}
+                      onClick={() => {
+                        setActiveSubTab('upcoming');
+                        setPastFilter('all');
+                      }}
+                      type="button"
+                    >
+                      <i className="fas fa-calendar-alt"></i>
+                      Upcoming ({upcomingAppointments.length})
+                    </button>
+                    <button
+                      className={`subtab-btn ${activeSubTab === 'completed' ? 'active' : ''}`}
+                      onClick={() => {
+                        setActiveSubTab('completed');
+                        setPastFilter('completed');
+                      }}
+                      type="button"
+                    >
+                      <i className="fas fa-check-circle"></i>
+                      Completed
+                    </button>
+                    <button
+                      className={`subtab-btn ${activeSubTab === 'cancelled' ? 'active' : ''}`}
+                      onClick={() => {
+                        setActiveSubTab('cancelled');
+                        setPastFilter('cancelled');
+                      }}
+                      type="button"
+                    >
+                      <i className="fas fa-ban"></i>
+                      Cancelled
+                    </button>
                   </div>
+                </div>
 
-                  {/* Section 1: Upcoming Appointments (Token No. REMOVED as requested) */}
-                  {(activeSubTab === 'all' || activeSubTab === 'upcoming') && (
-                    <div className="appointments-section-card">
-                      <div className="section-card-header">
-                        <div className="section-header-info">
-                          <div className="section-icon-badge">
-                            <i className="far fa-clock"></i>
-                          </div>
-                          <div>
-                            <h3 className="section-title">Upcoming Appointments ({upcomingAppointments.length})</h3>
-                            <p className="section-subtitle">Manage your upcoming OPD appointments.</p>
-                          </div>
+                {/* Section 1: Upcoming Appointments (Token No. REMOVED as requested) */}
+                {activeSubTab === 'upcoming' && (
+                  <div className="appointments-section-card">
+                    <div className="section-card-header">
+                      <div className="section-header-info">
+                        <div className="section-icon-badge">
+                          <i className="far fa-clock"></i>
+                        </div>
+                        <div>
+                          <h3 className="section-title">Upcoming Appointments ({upcomingAppointments.length})</h3>
+                          <p className="section-subtitle">Manage your upcoming OPD appointments.</p>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="ari-table-responsive">
-                        <table className="ari-appointments-table">
-                          <thead>
-                            <tr>
-                              <th>Date &amp; Time</th>
-                              <th>Doctor</th>
-                              <th>Specialty</th>
-                              <th>Hospital / Location</th>
-                              {/* Token No. Column removed as requested */}
-                              <th>Payment Status</th>
-                              <th style={{ minWidth: '240px' }}>Action</th>
-                            </tr>
-                          </thead>
+                    <div className="ari-table-responsive">
+                      <table className="ari-appointments-table">
+                        <thead>
+                          <tr>
+                            <th>Date &amp; Time</th>
+                            <th>Doctor</th>
+                            <th>Specialty</th>
+                            <th>Hospital / Location</th>
+                            {/* Token No. Column removed as requested */}
+                            <th>Payment Status</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
                           <tbody>
                             {upcomingAppointments.length === 0 ? (
                               <tr>
@@ -483,8 +480,7 @@ export default function MyAppointments() {
                   )}
 
                   {/* Section 2: Past Appointments (Token No. preserved, Status dropdown filter & pagination) */}
-                  {(activeSubTab === 'all' || activeSubTab === 'completed' || activeSubTab === 'cancelled') && (
-                    <div className="appointments-section-card">
+                  <div className="appointments-section-card">
                       <div className="section-card-header">
                         <div className="section-header-info">
                           <div className="section-icon-badge">
@@ -641,7 +637,6 @@ export default function MyAppointments() {
                         </div>
                       </div>
                     </div>
-                  )}
                 </>
               )}
 
@@ -787,7 +782,6 @@ export default function MyAppointments() {
                 </div>
               )}
             </div>
-          </div>
         </div>
       </div>
 
