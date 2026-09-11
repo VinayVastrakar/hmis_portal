@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import MyAppointments from './pages/MyAppointments';
+import BookAppointment from './pages/BookAppointment';
 
 export default function App() {
   return (
@@ -11,6 +12,8 @@ export default function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/book-appointment" element={<BookAppointment />} />
+        <Route path="/booking" element={<BookAppointment />} />
         <Route path="/appointments" element={<MyAppointments />} />
         <Route path="/my-appointments" element={<MyAppointments />} />
         <Route path="*" element={<Navigate to="/" replace />} />

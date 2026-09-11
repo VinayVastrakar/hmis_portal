@@ -51,9 +51,9 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="col-lg-4 text-lg-end mt-3 mt-lg-0">
-              <a href="#booking" className="btn btn-ari-primary">
+              <Link to="/book-appointment" className="btn btn-ari-primary">
                 <i className="fas fa-calendar-plus me-2"></i> Book New Appointment
-              </a>
+              </Link>
             </div>
           </div>
         </div>

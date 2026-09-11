@@ -60,9 +60,12 @@ export default function Navbar() {
               </NavLink>
             </li>
             <li className="nav-item">
-              <a className="nav-link px-3 py-2 fw-semibold text-secondary" href="/dashboard#booking">
+              <NavLink 
+                className={({ isActive }) => `nav-link px-3 py-2 fw-semibold ${isActive ? 'nav-link-pill-active' : 'text-secondary'}`} 
+                to="/book-appointment"
+              >
                 Book Appointment
-              </a>
+              </NavLink>
             </li>
             <li className="nav-item">
               <a className="nav-link px-3 py-2 fw-semibold text-secondary" href="/dashboard#booking">
