@@ -1,19 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
   const [isNavCollapsed, setIsNavCollapsed] = useState(true);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
+  const [patientData, setPatientData] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const data = localStorage.getItem('patientDetails');
+    if (data) {
+      try {
+        setPatientData(JSON.parse(data));
+      } catch (e) {
+        console.error("Failed to parse patient data", e);
+      }
+    }
+  }, []);
 
   const handleNavCollapse = () => setIsNavCollapsed(!isNavCollapsed);
 
   const handleLogout = (e) => {
     e.preventDefault();
     if (window.confirm('Are you sure you want to logout?')) {
+      localStorage.clear();
       navigate('/login');
     }
+  };
+
+  const getUserInitials = () => {
+    if (!patientData || !patientData.patientName) return 'U';
+    const names = patientData.patientName.split(' ');
+    if (names.length === 1) return names[0].charAt(0).toUpperCase();
+    return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
   };
 
   return (
@@ -161,10 +181,10 @@ export default function Navbar() {
                   className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
                   style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #1E60F4, #3B82F6)', fontSize: '0.88rem' }}
                 >
-                  JD
+                  {getUserInitials()}
                 </div>
                 <div className="d-none d-md-flex align-items-center gap-1">
-                  <span className="fw-semibold text-dark small">John Doe</span>
+                  <span className="fw-semibold text-dark small">{patientData?.patientName || 'User'}</span>
                   <i className="fas fa-chevron-down text-muted" style={{ fontSize: '0.7rem' }}></i>
                 </div>
               </div>
@@ -176,9 +196,9 @@ export default function Navbar() {
                   style={{ right: 0, top: '100%', minWidth: '220px', zIndex: 1050 }}
                 >
                   <div className="px-3 py-2 border-bottom bg-light rounded-top">
-                    <strong className="text-dark d-block">John Doe (Nitin Dinkar)</strong>
-                    <div className="small text-muted">+91 9876543210</div>
-                    <div className="small text-primary mt-1">Patient ID: ARI-PT-8842</div>
+                    <strong className="text-dark d-block">{patientData?.patientName || 'User'}</strong>
+                    <div className="small text-muted">{patientData?.patientPhoneNumber ? `+91 ${patientData.patientPhoneNumber}` : 'No Phone'}</div>
+                    <div className="small text-primary mt-1">Patient ID: {patientData?.patientId || 'N/A'}</div>
                   </div>
                   <NavLink className="dropdown-item py-2" to="/dashboard" onClick={() => setShowProfileMenu(false)}>
                     <i className="fas fa-columns me-2 text-primary"></i> Dashboard
