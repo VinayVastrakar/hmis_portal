@@ -208,12 +208,18 @@ export default function Dashboard() {
                   <Link to="/appointments" className="btn btn-ari-outline">
                     <i className="fas fa-history me-2"></i> View All Appointments
                   </Link>
-                  <a href="#prescriptions" className="btn btn-ari-outline">
+                  <Link to="/appointments?tab=radiology" className="btn btn-ari-outline" style={{ borderColor: '#7C3AED', color: '#7C3AED' }}>
+                    <i className="fas fa-x-ray me-2"></i> Radiology Appointments &amp; Tests
+                  </Link>
+                  <Link to="/appointments?tab=lab" className="btn btn-ari-outline" style={{ borderColor: '#059669', color: '#059669' }}>
+                    <i className="fas fa-flask me-2"></i> Lab Appointments &amp; Tests
+                  </Link>
+                  <Link to="/health-records" className="btn btn-ari-outline">
                     <i className="fas fa-prescription me-2"></i> Digital Prescriptions
-                  </a>
-                  <a href="#records" className="btn btn-ari-outline">
+                  </Link>
+                  <Link to="/health-records" className="btn btn-ari-outline">
                     <i className="fas fa-file-medical me-2"></i> Medical Records
-                  </a>
+                  </Link>
                   <a href="#emergency" className="btn btn-ari-outline">
                     <i className="fas fa-ambulance me-2"></i> Emergency Services
                   </a>

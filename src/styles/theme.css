@@ -1,0 +1,522 @@
+/* ========================================================
+   THEME.CSS — Bootstrap Override Layer
+   --------------------------------------------------------
+   This file makes EVERY Bootstrap class use your `:root`
+   variables from style.css.  Change a color there and it
+   automatically reflects in buttons, badges, alerts,
+   navs, modals, forms — everywhere.
+   ======================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+
+/* --------------------------------------------------------
+   1. Bootstrap CSS Variable Overrides
+   -------------------------------------------------------- */
+:root {
+  --bs-primary:       var(--primary-color);
+  --bs-primary-rgb:   46, 91, 255;
+  --bs-secondary:     var(--secondary-color);
+  --bs-secondary-rgb: 108, 99, 255;
+  --bs-success:       var(--success-color);
+  --bs-success-rgb:   54, 179, 126;
+  --bs-danger:        var(--danger-color);
+  --bs-danger-rgb:    255, 86, 48;
+  --bs-warning:       var(--warning-color);
+  --bs-warning-rgb:   255, 171, 0;
+  --bs-info:          var(--accent-color);
+  --bs-info-rgb:      76, 201, 240;
+  --bs-link-color:    var(--primary-color);
+  --bs-link-hover-color: var(--primary-hover);
+  --bs-border-color:  var(--border-color);
+  --bs-body-bg:       var(--light-color);
+  --bs-body-color:    var(--dark-color);
+  --bs-body-font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+/* ========================================================
+   2. BUTTONS — All variants
+   ======================================================== */
+
+/* --- Primary --- */
+.btn-primary {
+  background: var(--primary-gradient) !important;
+  border-color: var(--primary-color) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(46, 91, 255, 0.2);
+  transition: var(--transition);
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active,
+.btn-primary.active, .show > .btn-primary.dropdown-toggle {
+  background: linear-gradient(135deg, var(--primary-hover), var(--primary-color)) !important;
+  border-color: var(--primary-hover) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 20px rgba(46, 91, 255, 0.3);
+  transform: translateY(-1px);
+}
+.btn-primary:disabled, .btn-primary.disabled {
+  background: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  opacity: 0.65;
+}
+
+/* --- Secondary --- */
+.btn-secondary {
+  background-color: var(--secondary-color) !important;
+  border-color: var(--secondary-color) !important;
+  color: #fff !important;
+}
+.btn-secondary:hover, .btn-secondary:focus, .btn-secondary:active {
+  background-color: var(--secondary-hover) !important;
+  border-color: var(--secondary-hover) !important;
+  color: #fff !important;
+}
+
+/* --- Success --- */
+.btn-success {
+  background-color: var(--success-color) !important;
+  border-color: var(--success-color) !important;
+  color: #fff !important;
+}
+.btn-success:hover, .btn-success:focus, .btn-success:active {
+  filter: brightness(0.9);
+  border-color: var(--success-color) !important;
+  color: #fff !important;
+}
+
+/* --- Danger --- */
+.btn-danger {
+  background-color: var(--danger-color) !important;
+  border-color: var(--danger-color) !important;
+  color: #fff !important;
+}
+.btn-danger:hover, .btn-danger:focus, .btn-danger:active {
+  filter: brightness(0.9);
+  border-color: var(--danger-color) !important;
+  color: #fff !important;
+}
+
+/* --- Warning --- */
+.btn-warning {
+  background-color: var(--warning-color) !important;
+  border-color: var(--warning-color) !important;
+  color: #212529 !important;
+}
+.btn-warning:hover, .btn-warning:focus, .btn-warning:active {
+  filter: brightness(0.9);
+  border-color: var(--warning-color) !important;
+}
+
+/* --- Info --- */
+.btn-info {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: #212529 !important;
+}
+.btn-info:hover, .btn-info:focus, .btn-info:active {
+  filter: brightness(0.9);
+  border-color: var(--accent-color) !important;
+}
+
+
+/* ========================================================
+   3. OUTLINE BUTTONS — All variants
+   ======================================================== */
+.btn-outline-primary {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  background-color: transparent !important;
+}
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+
+.btn-outline-secondary {
+  color: var(--secondary-color) !important;
+  border-color: var(--secondary-color) !important;
+}
+.btn-outline-secondary:hover, .btn-outline-secondary:focus, .btn-outline-secondary:active {
+  background-color: var(--secondary-color) !important;
+  border-color: var(--secondary-color) !important;
+  color: #fff !important;
+}
+
+.btn-outline-success {
+  color: var(--success-color) !important;
+  border-color: var(--success-color) !important;
+}
+.btn-outline-success:hover, .btn-outline-success:focus, .btn-outline-success:active {
+  background-color: var(--success-color) !important;
+  color: #fff !important;
+}
+
+.btn-outline-danger {
+  color: var(--danger-color) !important;
+  border-color: var(--danger-color) !important;
+}
+.btn-outline-danger:hover, .btn-outline-danger:focus, .btn-outline-danger:active {
+  background-color: var(--danger-color) !important;
+  color: #fff !important;
+}
+
+.btn-outline-warning {
+  color: var(--warning-color) !important;
+  border-color: var(--warning-color) !important;
+}
+.btn-outline-warning:hover, .btn-outline-warning:focus, .btn-outline-warning:active {
+  background-color: var(--warning-color) !important;
+  color: #212529 !important;
+}
+
+.btn-outline-info {
+  color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+}
+.btn-outline-info:hover, .btn-outline-info:focus, .btn-outline-info:active {
+  background-color: var(--accent-color) !important;
+  color: #212529 !important;
+}
+
+
+/* ========================================================
+   4. BACKGROUND UTILITIES
+   ======================================================== */
+.bg-primary         { background-color: var(--primary-color) !important; }
+.bg-secondary       { background-color: var(--secondary-color) !important; }
+.bg-success         { background-color: var(--success-color) !important; }
+.bg-danger          { background-color: var(--danger-color) !important; }
+.bg-warning         { background-color: var(--warning-color) !important; }
+.bg-info            { background-color: var(--accent-color) !important; }
+.bg-primary-gradient { background: var(--primary-gradient) !important; }
+.bg-accent-gradient  { background: var(--accent-gradient) !important; }
+
+/* Subtle Backgrounds (Bootstrap 5.3+) */
+.bg-primary-subtle  { background-color: rgba(46, 91, 255, 0.1) !important; }
+.bg-success-subtle  { background-color: rgba(54, 179, 126, 0.1) !important; }
+.bg-danger-subtle   { background-color: rgba(255, 86, 48, 0.1) !important; }
+.bg-warning-subtle  { background-color: rgba(255, 171, 0, 0.1) !important; }
+.bg-info-subtle     { background-color: rgba(76, 201, 240, 0.1) !important; }
+.bg-secondary-subtle { background-color: rgba(108, 99, 255, 0.1) !important; }
+
+
+/* ========================================================
+   5. TEXT COLOR UTILITIES
+   ======================================================== */
+.text-primary       { color: var(--primary-color) !important; }
+.text-secondary     { color: var(--secondary-color) !important; }
+.text-success       { color: var(--success-color) !important; }
+.text-danger        { color: var(--danger-color) !important; }
+.text-warning       { color: var(--warning-color) !important; }
+.text-info          { color: var(--accent-color) !important; }
+
+/* Subtle Text (Bootstrap 5.3+) */
+.text-primary-emphasis { color: var(--primary-dark) !important; }
+.text-success-emphasis { color: #1a6d42 !important; }
+.text-danger-emphasis  { color: #b23c20 !important; }
+.text-warning-emphasis { color: #997000 !important; }
+.text-info-emphasis    { color: #2a7a94 !important; }
+
+
+/* ========================================================
+   6. BORDER UTILITIES
+   ======================================================== */
+.border-primary     { border-color: var(--primary-color) !important; }
+.border-secondary   { border-color: var(--secondary-color) !important; }
+.border-success     { border-color: var(--success-color) !important; }
+.border-danger      { border-color: var(--danger-color) !important; }
+.border-warning     { border-color: var(--warning-color) !important; }
+.border-info        { border-color: var(--accent-color) !important; }
+
+
+/* ========================================================
+   7. BADGES
+   ======================================================== */
+.badge.bg-primary   { background-color: var(--primary-color) !important; color: #fff !important; }
+.badge.bg-secondary { background-color: var(--secondary-color) !important; color: #fff !important; }
+.badge.bg-success   { background-color: var(--success-color) !important; color: #fff !important; }
+.badge.bg-danger    { background-color: var(--danger-color) !important; color: #fff !important; }
+.badge.bg-warning   { background-color: var(--warning-color) !important; color: #212529 !important; }
+.badge.bg-info      { background-color: var(--accent-color) !important; color: #212529 !important; }
+
+/* Rounded pill badges */
+.badge.rounded-pill.bg-primary   { background-color: var(--primary-color) !important; }
+.badge.rounded-pill.bg-secondary { background-color: var(--secondary-color) !important; }
+.badge.rounded-pill.bg-success   { background-color: var(--success-color) !important; }
+.badge.rounded-pill.bg-danger    { background-color: var(--danger-color) !important; }
+
+
+/* ========================================================
+   8. ALERTS
+   ======================================================== */
+.alert-primary {
+  color: var(--primary-dark);
+  background-color: rgba(46, 91, 255, 0.1);
+  border-color: rgba(46, 91, 255, 0.2);
+}
+.alert-secondary {
+  color: var(--secondary-hover);
+  background-color: rgba(108, 99, 255, 0.1);
+  border-color: rgba(108, 99, 255, 0.2);
+}
+.alert-success {
+  background-color: rgba(54, 179, 126, 0.1);
+  border-color: rgba(54, 179, 126, 0.2);
+  color: #1a6d42;
+}
+.alert-danger {
+  background-color: rgba(255, 86, 48, 0.1);
+  border-color: rgba(255, 86, 48, 0.2);
+  color: #b23c20;
+}
+.alert-warning {
+  background-color: rgba(255, 171, 0, 0.1);
+  border-color: rgba(255, 171, 0, 0.2);
+  color: #997000;
+}
+.alert-info {
+  background-color: rgba(76, 201, 240, 0.1);
+  border-color: rgba(76, 201, 240, 0.2);
+  color: #2a7a94;
+}
+
+
+/* ========================================================
+   9. FORM CONTROLS — Focus States
+   ======================================================== */
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 0.25rem rgba(46, 91, 255, 0.25) !important;
+}
+
+.form-check-input:checked {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.form-check-input:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 0.25rem rgba(46, 91, 255, 0.25) !important;
+}
+
+.form-switch .form-check-input:checked {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.form-range::-webkit-slider-thumb {
+  background-color: var(--primary-color);
+}
+.form-range::-moz-range-thumb {
+  background-color: var(--primary-color);
+}
+
+
+/* ========================================================
+   10. NAV PILLS / TABS
+   ======================================================== */
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  background-color: var(--primary-color) !important;
+  color: #fff !important;
+}
+
+.nav-pills .nav-link:hover {
+  color: var(--primary-color);
+}
+
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.nav-link {
+  color: var(--primary-color);
+}
+.nav-link:hover, .nav-link:focus {
+  color: var(--primary-hover);
+}
+
+
+/* ========================================================
+   11. LINKS
+   ======================================================== */
+a {
+  color: var(--primary-color);
+  transition: var(--transition);
+}
+a:hover {
+  color: var(--primary-hover);
+}
+
+.link-primary       { color: var(--primary-color) !important; }
+.link-primary:hover { color: var(--primary-hover) !important; }
+.link-secondary       { color: var(--secondary-color) !important; }
+.link-secondary:hover { color: var(--secondary-hover) !important; }
+.link-success       { color: var(--success-color) !important; }
+.link-danger        { color: var(--danger-color) !important; }
+.link-warning       { color: var(--warning-color) !important; }
+.link-info          { color: var(--accent-color) !important; }
+
+
+/* ========================================================
+   12. PROGRESS BARS
+   ======================================================== */
+.progress-bar {
+  background-color: var(--primary-color);
+}
+.progress-bar.bg-success { background-color: var(--success-color) !important; }
+.progress-bar.bg-danger  { background-color: var(--danger-color) !important; }
+.progress-bar.bg-warning { background-color: var(--warning-color) !important; }
+.progress-bar.bg-info    { background-color: var(--accent-color) !important; }
+
+
+/* ========================================================
+   13. LIST GROUP
+   ======================================================== */
+.list-group-item.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+.list-group-item-action:hover,
+.list-group-item-action:focus {
+  color: var(--primary-color);
+}
+
+.list-group-item-primary {
+  color: var(--primary-dark);
+  background-color: rgba(46, 91, 255, 0.1);
+}
+.list-group-item-success {
+  color: #1a6d42;
+  background-color: rgba(54, 179, 126, 0.1);
+}
+.list-group-item-danger {
+  color: #b23c20;
+  background-color: rgba(255, 86, 48, 0.1);
+}
+
+
+/* ========================================================
+   14. PAGINATION
+   ======================================================== */
+.page-link {
+  color: var(--primary-color);
+}
+.page-link:hover {
+  color: var(--primary-hover);
+}
+.page-item.active .page-link {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+.page-link:focus {
+  box-shadow: 0 0 0 0.25rem rgba(46, 91, 255, 0.25);
+}
+
+
+/* ========================================================
+   15. SPINNERS
+   ======================================================== */
+.spinner-border.text-primary { color: var(--primary-color) !important; }
+.spinner-border.text-secondary { color: var(--secondary-color) !important; }
+.spinner-border.text-success { color: var(--success-color) !important; }
+.spinner-border.text-danger  { color: var(--danger-color) !important; }
+.spinner-grow.text-primary  { color: var(--primary-color) !important; }
+
+
+/* ========================================================
+   16. DROPDOWN
+   ======================================================== */
+.dropdown-item.active,
+.dropdown-item:active {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+
+/* ========================================================
+   17. ACCORDION
+   ======================================================== */
+.accordion-button:not(.collapsed) {
+  color: var(--primary-color);
+  background-color: rgba(46, 91, 255, 0.05);
+  box-shadow: inset 0 -1px 0 rgba(46, 91, 255, 0.125);
+}
+.accordion-button:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(46, 91, 255, 0.25);
+}
+
+
+/* ========================================================
+   18. MODAL
+   ======================================================== */
+.modal-header {
+  border-bottom-color: var(--border-color);
+}
+.modal-footer {
+  border-top-color: var(--border-color);
+}
+
+
+/* ========================================================
+   19. CARD
+   ======================================================== */
+.card {
+  border-color: var(--border-color);
+}
+.card-header {
+  border-bottom-color: var(--border-color);
+}
+.card-footer {
+  border-top-color: var(--border-color);
+}
+
+
+/* ========================================================
+   20. TABLE
+   ======================================================== */
+.table-primary {
+  --bs-table-bg: rgba(46, 91, 255, 0.1);
+  color: var(--dark-color);
+}
+.table-success {
+  --bs-table-bg: rgba(54, 179, 126, 0.1);
+}
+.table-danger {
+  --bs-table-bg: rgba(255, 86, 48, 0.1);
+}
+.table-warning {
+  --bs-table-bg: rgba(255, 171, 0, 0.1);
+}
+.table-info {
+  --bs-table-bg: rgba(76, 201, 240, 0.1);
+}
+
+
+/* ========================================================
+   21. TOOLTIP & POPOVER
+   ======================================================== */
+.tooltip .tooltip-inner {
+  background-color: var(--dark-color);
+}
+.bs-tooltip-top .tooltip-arrow::before    { border-top-color: var(--dark-color); }
+.bs-tooltip-bottom .tooltip-arrow::before { border-bottom-color: var(--dark-color); }
+.bs-tooltip-start .tooltip-arrow::before  { border-left-color: var(--dark-color); }
+.bs-tooltip-end .tooltip-arrow::before    { border-right-color: var(--dark-color); }
+
+
+/* ========================================================
+   22. CLOSE BUTTON (for modals, alerts, toasts)
+   ======================================================== */
+.btn-close:focus {
+  box-shadow: 0 0 0 0.25rem rgba(46, 91, 255, 0.25);
+}

@@ -1,28 +1,378 @@
 /* style.css - Main Stylesheet for ARI-Health */
 
+/* ============================================================
+   MASTER COLOR TOKENS — Edit here to update the entire portal
+   ============================================================ */
 :root {
-  --ari-primary: #2E5BFF;
+  /* --- ARI Health Brand Colors --- */
+  --primary-color:    #2E5BFF;
+  --primary-hover:    #1A4AF5;
+  --primary-dark:     #0d47a1;
+  --secondary-color:  #6C63FF;
+  --secondary-hover:  #5550e0;
+  --accent-color:     #4CC9F0;
+
+  /* --- Status / Semantic Colors --- */
+  --success-color:    #36B37E;
+  --danger-color:     #FF5630;
+  --warning-color:    #FFAB00;
+  --info-color:       #4CC9F0;
+
+  /* --- Neutrals & Layout --- */
+  --light-color:      #F8F9FF;
+  --dark-color:       #1A1A2E;
+  --border-color:     #E0E7FF;
+  --gray-light:       #F5F7FF;
+  --title-color:      #2E5BFF;
+
+  /* --- Shadows, Radius, Transition --- */
+  --shadow:           0 8px 24px rgba(46, 91, 255, 0.08);
+  --radius:           12px;
+  --transition:       all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Chart Colors --- */
+  --chart-color1:     #2E5BFF;
+  --chart-color2:     #6C63FF;
+  --chart-color3:     #4CC9F0;
+  --chart-color4:     #36B37E;
+  --chart-color5:     #FFAB00;
+  --chart-color6:     #FF5630;
+
+  /* --- Gradients --- */
+  --primary-gradient: linear-gradient(135deg, #2E5BFF, #6C63FF);
+  --accent-gradient:  linear-gradient(135deg, #4CC9F0, #2E5BFF);
+
+  /* --- Legacy --ari-* aliases (kept for backward compatibility) --- */
+  --ari-primary:      #2E5BFF;
   --ari-primary-dark: #1A4AF5;
-  --ari-secondary: #6C63FF;
-  --ari-accent: #4CC9F0;
-  --ari-light: #F8F9FF;
-  --ari-dark: #1A1A2E;
-  --ari-success: #36B37E;
-  --ari-danger: #FF5630;
-  --ari-warning: #FFAB00;
-  --ari-border: #E0E7FF;
-  --title-color: #2E5BFF;
-  --ari-gray-light: #F5F7FF;
-  --ari-shadow: 0 8px 24px rgba(46, 91, 255, 0.08);
-  --ari-radius: 12px;
-  --ari-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* Medical Theme Colors */
-  --medical-blue: #1a73e8;
-  --medical-teal: #00bcd4;
-  --medical-blue-dark: #0d47a1;
+  --ari-secondary:    #6C63FF;
+  --ari-accent:       #4CC9F0;
+  --ari-light:        #F8F9FF;
+  --ari-dark:         #1A1A2E;
+  --ari-success:      #36B37E;
+  --ari-danger:       #FF5630;
+  --ari-warning:      #FFAB00;
+  --ari-border:       #E0E7FF;
+  --ari-gray-light:   #F5F7FF;
+  --ari-shadow:       0 8px 24px rgba(46, 91, 255, 0.08);
+  --ari-radius:       12px;
+  --ari-transition:   all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- Medical Theme Colors --- */
+  --medical-blue:       #1a73e8;
+  --medical-teal:       #00bcd4;
+  --medical-blue-dark:  #0d47a1;
   --medical-blue-light: #e3f2fd;
+
+
+  /* --- Footer Colors --- */
+  --footer-bg:     #0f172a;
+  --footer-muted:  #B0B7C3;
+  --footer-border: #2A2A3E;
+
+  /* --- Color Scale (light mode) --- */
+  --white-color:  #ffffff;
+  --color-fff:    #ffffff;
+  --color-000:    #000000;
+  --color-100:    #f8f9fa;
+  --color-200:    #e9ecef;
+  --color-300:    #dee2e6;
+  --color-400:    #ced4da;
+  --color-600:    #6c757d;
+  --color-700:    #495057;
+  --color-800:    #343a40;
+  --color-900:    #212529;
+
+  /* --- Semantic Layout Colors --- */
+  --body-color:   #f8f9fa;
+  --card-color:   #ffffff;
+  --text-color:   #212529;
+
+  /* --- Border Color --- */
+  --border-color: #E0E7FF;
 }
+
+/* ============================================================
+   GLOBAL UTILITY CLASSES
+   All reusable helpers for the ARI-Health portal.
+   ============================================================ */
+
+/* --- Color Utilities --- */
+.bg-secondary-color  { background: #f7b36b !important; }
+
+.bg-primary-gradient {
+  background: var(--primary-gradient) !important;
+  color: #fff;
+}
+
+.color-defult        { color: #212529 !important; }
+.color-defult-white  { color: #fff; }
+
+.text-muted          { color: #9a9b9d !important; }
+
+.link-secondary      { color: var(--secondary-color) !important; }
+
+/* --- Status Button Overrides --- */
+.btn-success  { background-color: #4dca88; border-color: #4dca88; }
+.btn-danger   { background-color: #fc5a69; border-color: #fc5a69; }
+.btn-warning  { background-color: #ffba33; border-color: #ffba33; }
+.btn-info     { background-color: #4fb8c9; border-color: #4fb8c9; }
+
+/* --- Chart Color Badges --- */
+.chart-color1 { background-color: var(--chart-color1) !important; }
+.chart-color2 { background-color: var(--chart-color2) !important; }
+.chart-color3 { background-color: var(--chart-color3) !important; }
+.chart-color4 { background-color: var(--chart-color4) !important; }
+.chart-color5 { background-color: var(--chart-color5) !important; }
+
+/* --- Border Color Override --- */
+.border,
+.border-left,
+.border-top,
+.border-right,
+.border-bottom { border-color: var(--color-100) !important; }
+
+/* --- Dimension Helpers --- */
+.vh100 { height: 100vh; }
+.w30   { width: 30px; }
+.w60   { width: 60px; }
+.w90   { width: 90px; }
+.w120  { width: 120px; }
+.w220  { width: 220px; }
+.w240  { width: 240px; }
+.w280  { width: 280px; }
+.w380  { width: 380px; }
+.w-30  { width: 30%; }
+.min-height-220 { min-height: 220px; }
+
+/* --- Text Color Scale --- */
+.color-fff  { color: var(--color-fff); }
+.color-000  { color: var(--color-000); }
+.color-100  { color: var(--color-100); }
+.color-200  { color: var(--color-200); }
+.color-300  { color: var(--color-300); }
+.color-400  { color: var(--color-400); }
+.color-600  { color: var(--color-600); }
+.color-700  { color: var(--color-700); }
+.color-800  { color: var(--color-800); }
+.color-900  { color: var(--color-900); }
+
+/* --- Background Color Scale --- */
+.color-bg-fff  { background-color: var(--color-fff) !important; }
+.color-bg-000  { background-color: var(--color-000) !important; }
+.color-bg-100  { background-color: var(--color-100) !important; }
+.color-bg-200  { background-color: var(--color-200) !important; }
+.color-bg-300  { background-color: var(--color-300) !important; }
+.color-bg-400  { background-color: var(--color-400) !important; }
+.color-bg-600  { background-color: var(--color-600) !important; }
+.color-bg-700  { background-color: var(--color-700) !important; }
+.color-bg-800  { background-color: var(--color-800) !important; }
+.color-bg-900  { background-color: var(--color-900) !important; }
+
+/* --- Primary Background --- */
+.bg-primary      { background-color: var(--primary-color) !important; }
+.bg-dark-defualt { background-color: #212529 !important; }
+
+/* --- Named Light Backgrounds --- */
+.bg-lightyellow      { background-color: #ffe28c !important; }
+.bg-lightblue        { background-color: #a7daff !important; }
+.bg-lightgreen       { background-color: #a8d7e0 !important; }
+.light-warning-bg    { background-color: #fff4de !important; }
+.light-primary-bg    { background-color: #e1f0ff !important; }
+.light-info-bg       { background-color: #eee5ff !important; }
+.light-danger-bg     { background-color: #f1c8db !important; }
+.light-success-bg    { background-color: #a0d9b4 !important; }
+.light-orange-bg     { background-color: #ffaa8a !important; }
+.bg-info-light       { background-color: #9ae8ff !important; }
+.bg-santa-fe         { background-color: #b87c4c !important; }
+.bg-careys-pink      { background-color: #cf9eac !important; }
+.bg-lavender-purple  { background-color: #a883ba !important; }
+.bg-video            { background-color: #1a1e2b !important; }
+
+/* --- Named Text Colors --- */
+.text-blue           { color: #0d6efd !important; }
+.color-lightyellow   { color: #ffe28c !important; }
+.color-lightblue     { color: #a7daff !important; }
+.color-lightgreen    { color: #a8d7e0 !important; }
+.color-light-success { color: #a0d9b4 !important; }
+.color-light-orange  { color: #ffaa8a !important; }
+.color-info-light    { color: #9ae8ff !important; }
+.color-santa-fe      { color: #b87c4c !important; }
+.color-careys-pink   { color: #cf9eac !important; }
+.color-lavender-purple { color: #a883ba !important; }
+.color-danger        { color: #f1c8db !important; }
+
+/* --- Image Overlay --- */
+.img-overlay { position: relative; }
+.img-overlay:before {
+  content: "";
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.4);
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+/* --- Colored Left-Border Line Indicators --- */
+.line-lightyellow,
+.line-lightblue,
+.line-lightgreen,
+.line-light-success,
+.line-light-orange,
+.line-info-light,
+.line-santa-fe,
+.line-careys-pink,
+.line-lavender-purple { position: relative; }
+
+.line-lightyellow:before    { content: ""; position: absolute; left: -1px; width: 5px; height: 100%; background-color: #ffe28c !important; }
+.line-lightblue:before      { content: ""; position: absolute; left: -1px; width: 5px; height: 100%; background-color: #a7daff !important; }
+.line-lightgreen:before     { content: ""; position: absolute; left: -1px; width: 5px; height: 100%; background-color: #a8d7e0 !important; }
+.line-light-success:before  { content: ""; position: absolute; left: -1px; width: 5px; height: 100%; background-color: #a0d9b4 !important; }
+.line-light-orange:before   { content: ""; position: absolute; left: -1px; width: 5px; height: 100%; background-color: #ffaa8a !important; }
+.line-info-light:before     { content: ""; position: absolute; left: -1px; width: 5px; height: 100%; background-color: #9ae8ff !important; }
+.line-santa-fe:before       { content: ""; position: absolute; left: -1px; width: 5px; height: 100%; background-color: #b87c4c !important; }
+.line-careys-pink:before    { content: ""; position: absolute; left: -1px; width: 5px; height: 100%; background-color: #cf9eac !important; }
+.line-lavender-purple:before { content: ""; position: absolute; left: -1px; width: 5px; height: 100%; background-color: #a883ba !important; }
+
+/* --- Typography Helpers --- */
+.line-height-custom { line-height: 24px; }
+.line-height-sm     { line-height: 15px; }
+.small-14           { font-size: 14px; }
+.small-11           { font-size: 11px; }
+
+/* --- Misc Utilities --- */
+.no-bg    { background-color: transparent !important; }
+.pointer  { cursor: pointer; }
+
+.btn-postion {
+  position: absolute;
+  right: 15px;
+  top: -50px;
+}
+
+@media only screen and (max-width: 640px) {
+  .btn-postion { position: unset; right: unset; top: unset; }
+}
+
+.chooser {
+  position: absolute;
+  z-index: 1;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* --- Divider Utilities --- */
+.dividers {
+  display: flex;
+  align-items: center;
+}
+.dividers:after,
+.dividers:before {
+  flex: 1 1 0%;
+  border-top: 0.0625rem solid var(--border-color);
+  content: "";
+  margin-top: 0.0625rem;
+}
+.dividers::before { margin-right: 1.5rem; }
+.dividers::after  { margin-left: 1.5rem; }
+
+.dividers-block {
+  margin: 1rem 0;
+  color: inherit;
+  background-color: currentColor;
+  border: 0;
+  opacity: 0.25;
+}
+.dividers-block:not([size]) { height: 1px; }
+
+/* --- Task Status --- */
+.task_status span { width: 15px; height: 15px; display: block; }
+
+/* --- Lift Hover Effect --- */
+.lift { transition: box-shadow 0.25s ease, transform 0.25s ease; }
+.lift:focus,
+.lift:hover {
+  box-shadow: 0 6px 1rem rgba(33, 37, 41, 0.1), 0 0.5rem 1rem -0.75rem rgba(33, 37, 41, 0.1) !important;
+  transform: translate3d(0, -3px, 0);
+}
+
+/* --- Animations --- */
+.dropdown-animation {
+  opacity: 0;
+  transform: translateY(15px);
+  animation: eliment-animation 0.2s ease-in-out 0.05s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes eliment-animation {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes ping {
+  0%   { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* --- Dark Theme Overrides --- */
+[data-theme="dark"] .btn-light             { background-color: var(--body-color); border-color: var(--body-color); }
+[data-theme="dark"] .shadow-sm             { box-shadow: 0 0.125rem 0.25rem rgba(255,255,255,0.23) !important; }
+[data-theme="dark"] .shadow               { box-shadow: 0 0.5rem 1rem rgba(255,255,255,0.19) !important; }
+[data-theme="dark"] .text-muted           { color: #5b5b5b !important; }
+[data-theme="dark"] .light-warning-bg     { background-color: #ead09d !important; }
+
+[data-theme="dark"] .border,
+[data-theme="dark"] .border-left,
+[data-theme="dark"] .border-top,
+[data-theme="dark"] .border-right,
+[data-theme="dark"] .border-bottom        { border-color: var(--border-color) !important; }
+
+[data-theme="dark"] .table-hover > tbody > tr:hover { --bs-table-accent-bg: var(--border-color); }
+
+[data-theme="dark"] .bg-lightyellow,
+[data-theme="dark"] .bg-lightblue,
+[data-theme="dark"] .bg-lightgreen,
+[data-theme="dark"] .light-warning-bg,
+[data-theme="dark"] .light-primary-bg,
+[data-theme="dark"] .light-info-bg,
+[data-theme="dark"] .light-danger-bg,
+[data-theme="dark"] .light-success-bg,
+[data-theme="dark"] .light-orange-bg,
+[data-theme="dark"] .bg-info-light,
+[data-theme="dark"] .bg-santa-fe,
+[data-theme="dark"] .bg-careys-pink,
+[data-theme="dark"] .bg-lavender-purple   { color: var(--body-color); }
+
+/* --- High Contrast Theme Overrides --- */
+[data-theme="high-contrast"] .shadow-sm   { box-shadow: 0 0.125rem 0.25rem rgba(255,255,255,0.23) !important; }
+[data-theme="high-contrast"] .shadow      { box-shadow: 0 0.5rem 1rem rgba(255,255,255,0.19) !important; }
+
+[data-theme="high-contrast"] .border,
+[data-theme="high-contrast"] .border-top,
+[data-theme="high-contrast"] .border-right,
+[data-theme="high-contrast"] .border-bottom,
+[data-theme="high-contrast"] .border-left,
+[data-theme="high-contrast"] .dropdown-divider { border-color: var(--border-color) !important; }
+
+[data-theme="high-contrast"] .bg-lightyellow,
+[data-theme="high-contrast"] .bg-lightblue,
+[data-theme="high-contrast"] .bg-lightgreen,
+[data-theme="high-contrast"] .light-warning-bg,
+[data-theme="high-contrast"] .light-primary-bg,
+[data-theme="high-contrast"] .light-info-bg,
+[data-theme="high-contrast"] .light-danger-bg,
+[data-theme="high-contrast"] .light-success-bg,
+[data-theme="high-contrast"] .light-orange-bg,
+[data-theme="high-contrast"] .bg-info-light,
+[data-theme="high-contrast"] .bg-santa-fe,
+[data-theme="high-contrast"] .bg-careys-pink,
+[data-theme="high-contrast"] .bg-lavender-purple { color: var(--body-color); }
+
+[data-theme="high-contrast"] .avatar.no-thumbnail { background-color: #212529; }
+[data-theme="high-contrast"] .border-dark         { border-color: var(--color-200) !important; }
+[data-theme="high-contrast"] .input-group-text    { color: var(--card-color); }
+
 
 /* Reset and Base Styles */
 * {
@@ -34,8 +384,8 @@
 body, html {
   min-height: 100%;
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #F8F9FF;
-  color: var(--ari-dark);
+  background-color: var(--light-color);
+  color: var(--dark-color);
   overflow-x: hidden;
 }
 
@@ -48,12 +398,17 @@ h1, h2, h3, h4, h5, h6 {
 
 a {
   text-decoration: none;
-  color: var(--ari-primary);
-  transition: var(--ari-transition);
+  color: var(--primary-color);
+  transition: var(--transition);
 }
 
 a:hover {
-  color: var(--ari-primary-dark);
+  color: var(--primary-hover);
+}
+
+/* Footer muted text utility */
+.text-footer-muted {
+  color: var(--footer-muted) !important;
 }
 
 /* Container */
@@ -1235,6 +1590,232 @@ a:hover {
   border-color: #B91C1C;
 }
 
+.btn-action-disabled {
+  background: #F8FAFC;
+  color: #94A3B8;
+  border: 1.5px solid #CBD5E1;
+  padding: 6px 12px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: not-allowed;
+  white-space: nowrap;
+  opacity: 0.65;
+}
+
+/* Diagnostic Banners (Lab & Radiology) */
+.section-banner-lab {
+  background: #E8F8F0;
+  border-bottom: 1px solid #D1FAE5;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.section-banner-radiology {
+  background: #F3E8FF;
+  border-bottom: 1px solid #DDD6FE;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top-left-radius: 14px;
+  border-top-right-radius: 14px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.banner-icon-lab {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #10B981;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+  flex-shrink: 0;
+}
+
+.banner-icon-radiology {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #7C3AED;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.25);
+  flex-shrink: 0;
+}
+
+.btn-book-lab {
+  background: #059669;
+  color: #ffffff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-book-lab:hover {
+  background: #047857;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+  color: #ffffff;
+}
+
+.btn-book-radiology {
+  background: #7C3AED;
+  color: #ffffff;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-book-radiology:hover {
+  background: #6D28D9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.35);
+  color: #ffffff;
+}
+
+.status-pill-scheduled {
+  background: #EFF6FF;
+  color: #1D4ED8;
+  border: 1px solid #BFDBFE;
+}
+
+/* Category Navigation Bar & Quick Switches */
+.category-nav-bar {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.category-pill-btn {
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  background: #F8FAFC;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.category-pill-btn:hover {
+  background: #F1F5F9;
+  color: #1E293B;
+}
+
+.category-pill-btn.active-opd {
+  background: #1E60F4;
+  color: #ffffff;
+  border-color: #1E60F4;
+}
+
+.category-pill-btn.active-radiology {
+  background: #7C3AED;
+  color: #ffffff;
+  border-color: #7C3AED;
+}
+
+.category-pill-btn.active-lab {
+  background: #059669;
+  color: #ffffff;
+  border-color: #059669;
+}
+
+.category-pill-btn.active-all {
+  background: #0F172A;
+  color: #ffffff;
+  border-color: #0F172A;
+}
+
+.quick-diagnostic-banner {
+  background: linear-gradient(135deg, #F3E8FF 0%, #E8F8F0 100%);
+  border: 1px solid #DDD6FE;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* Diagnostic Report Modal Sheet */
+.report-sheet {
+  background: #ffffff;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #E2E8F0;
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.86rem;
+}
+
+.report-table th {
+  background: #F8FAFC;
+  padding: 10px 12px;
+  border-bottom: 1px solid #E2E8F0;
+  color: #475569;
+  font-weight: 700;
+}
+
+.report-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #F1F5F9;
+}
+
 /* Status Filter Dropdown */
 .status-filter-select {
   background: #ffffff;
@@ -2029,5 +2610,214 @@ a:hover {
     text-align: left;
   }
 }
+
+/* ========================================================
+   PATIENT DROPDOWN & FAMILY MANAGEMENT STYLES
+   ======================================================== */
+.patient-dropdown-menu {
+  width: 300px;
+  border-radius: 16px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.12);
+  padding: 0;
+  overflow: hidden;
+}
+
+.patient-dropdown-header {
+  background: linear-gradient(135deg, #EDF4FF, #F8FAFC);
+  padding: 16px 18px;
+  border-bottom: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patient-header-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1E60F4, #3B82F6);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(30, 96, 244, 0.25);
+}
+
+.patient-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.patient-header-name {
+  font-weight: 800;
+  font-size: 0.96rem;
+  color: #0F172A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.patient-header-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+  background: #1E60F4;
+  color: #ffffff;
+  width: fit-content;
+}
+
+.patient-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 18px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+}
+
+.patient-menu-item:hover {
+  background: #F8FAFC;
+  color: #1E60F4;
+}
+
+.patient-menu-item-icon {
+  width: 22px;
+  color: #1E60F4;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.menu-arrow-icon {
+  font-size: 0.78rem;
+  color: #94A3B8;
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.menu-arrow-icon.open {
+  transform: rotate(90deg);
+  color: #1E60F4;
+}
+
+/* Collapsible Switch Submenu */
+.switch-patient-submenu {
+  background: #F8FAFC;
+  border-top: 1px solid #F1F5F9;
+  border-bottom: 1px solid #F1F5F9;
+  padding: 6px 0;
+  max-height: 230px;
+  overflow-y: auto;
+}
+
+.switch-patient-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.switch-patient-row:hover {
+  background: #EDF4FF;
+}
+
+.switch-patient-row.active {
+  background: #E0EDFF;
+}
+
+.switch-patient-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch-avatar-mini {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #CBD5E1;
+  color: #1E293B;
+  font-weight: 700;
+  font-size: 0.76rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.switch-patient-row.active .switch-avatar-mini {
+  background: #1E60F4;
+  color: #ffffff;
+}
+
+.switch-name-text {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.2;
+}
+
+.switch-sub-text {
+  font-size: 0.75rem;
+  color: #64748B;
+}
+
+.switch-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #1E60F4;
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.switch-add-btn:hover {
+  background: #EDF4FF;
+  text-decoration: underline;
+}
+
+/* Family Member Cards in Modal */
+.family-member-card {
+  background: #ffffff;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  transition: all 0.2s ease;
+}
+
+.family-member-card:hover {
+  border-color: #1E60F4;
+  box-shadow: 0 4px 14px rgba(30, 96, 244, 0.08);
+}
+
+.family-member-card.is-active {
+  border-color: #1E60F4;
+  background: #FAFBFD;
+}
+
 
 
