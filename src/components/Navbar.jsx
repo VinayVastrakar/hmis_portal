@@ -6,13 +6,36 @@ export default function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
   const [patientData, setPatientData] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showFamilyModal, setShowFamilyModal] = useState(false);
+  const [showSwitchSubmenu, setShowSwitchSubmenu] = useState(false);
+  const [patients, setPatients] = useState([]);
+  const [activePatientId, setActivePatientId] = useState(null);
+  const [newMemberName, setNewMemberName] = useState('');
+  const [newMemberRelation, setNewMemberRelation] = useState('Spouse');
+  const [newMemberDob, setNewMemberDob] = useState('');
+  const [newMemberGender, setNewMemberGender] = useState('Female');
+  const [toastMessage, setToastMessage] = useState('');
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const data = localStorage.getItem('patientDetails');
     if (data) {
       try {
-        setPatientData(JSON.parse(data));
+        const parsed = JSON.parse(data);
+        setPatientData(parsed);
+        // Map local storage data to the expected activePatient format
+        setPatients([{
+          id: parsed.patientId || 1,
+          name: parsed.patientName || 'User',
+          relation: 'Self',
+          gender: 'N/A',
+          age: 'N/A',
+          dob: 'N/A',
+          patientId: parsed.patientId || 'N/A'
+        }]);
+        setActivePatientId(parsed.patientId || 1);
       } catch (e) {
         console.error("Failed to parse patient data", e);
       }
@@ -36,18 +59,37 @@ export default function Navbar() {
     setShowProfileMenu(false);
   };
 
-  const handleSelectPatient = (patientId) => {
+  const handleSelectPatient = (patient) => {
     // To be implemented later
-    console.log('Patient selected:', patientId);
-    alert('Switch Patient functionality coming soon!');
+    console.log('Patient selected:', patient);
+    setActivePatientId(patient.id);
+    showToast(`Switched to ${patient.name}`);
     setShowProfileMenu(false);
   };
 
-  const getUserInitials = () => {
-    if (!patientData || !patientData.patientName) return 'U';
-    const names = patientData.patientName.split(' ');
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    const names = name.split(' ');
     if (names.length === 1) return names[0].charAt(0).toUpperCase();
     return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+  };
+
+  const getUserInitials = () => getInitials(patientData?.patientName);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
+
+  // Derive active patient from state
+  const activePatient = patients.find(p => p.id === activePatientId) || {
+    name: patientData?.patientName || 'User',
+    relation: 'Self',
+    gender: 'N/A',
+    age: 'N/A',
+    patientId: patientData?.patientId || 'N/A',
+    abhaId: 'ABHA-XXXX-XXXX-XXXX',
+    address: 'Not provided'
   };
 
   return (
@@ -382,65 +424,22 @@ export default function Navbar() {
                   className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-4"
                   style={{ width: '64px', height: '64px', background: 'var(--primary-gradient)' }}
                 >
-                  {getUserInitials()}
+                  {getInitials(activePatient.name)}
                 </div>
-                <div className="d-none d-md-flex align-items-center gap-1">
-                  <span className="fw-semibold text-dark small">{patientData?.patientName || 'User'}</span>
-                  <i className="fas fa-chevron-down text-muted" style={{ fontSize: '0.7rem' }}></i>
-                </div>
-              </div>
-
-              {/* Profile Dropdown */}
-              {showProfileMenu && (
-                <div 
-                  className="dropdown-menu dropdown-menu-end show position-absolute mt-2 shadow-lg border-0 rounded-3" 
-                  style={{ right: 0, top: '100%', minWidth: '220px', zIndex: 1050 }}
-                >
-                  <div className="px-3 py-2 border-bottom bg-light rounded-top">
-                    <strong className="text-dark d-block">{patientData?.patientName || 'User'}</strong>
-                    <div className="small text-muted">{patientData?.patientPhoneNumber ? `+91 ${patientData.patientPhoneNumber}` : 'No Phone'}</div>
-                    <div className="small text-primary mt-1">Patient ID: {patientData?.patientId || 'N/A'}</div>
-                  </div>
-                  <NavLink className="dropdown-item py-2" to="/dashboard" onClick={() => setShowProfileMenu(false)}>
-                    <i className="fas fa-columns me-2 text-primary"></i> Dashboard
-                  </NavLink>
-                  <NavLink className="dropdown-item py-2" to="/appointments" onClick={() => setShowProfileMenu(false)}>
-                    <i className="fas fa-calendar-check me-2 text-primary"></i> My Appointments
-                  </NavLink>
-                  <a className="dropdown-item py-2" href="/dashboard#records" onClick={() => setShowProfileMenu(false)}>
-                    <i className="fas fa-file-medical me-2 text-primary"></i> Health Records
-                  </a>
-                  <div className="dropdown-divider"></div>
+                <div>
+                  <h5 className="mb-0 fw-bold">{activePatient.name}</h5>
+                  <div className="text-muted small mb-2">{activePatient.gender}, {activePatient.age} yrs • {activePatient.patientId}</div>
                   
-                  {/* Family Member Options Placeholders */}
-                  <h6 className="dropdown-header text-muted">Family Members</h6>
-                  <button 
-                    className="dropdown-item py-2" 
-                    onClick={() => handleSelectPatient('placeholder-id')}
-                  >
-                    <i className="fas fa-user-friends me-2 text-primary"></i> Switch Patient
-                  </button>
-                  <button 
-                    className="dropdown-item py-2" 
-                    onClick={handleAddFamilyMember}
-                  >
-                    <i className="fas fa-plus-circle me-2 text-primary"></i> Add Family Member
-                  </button>
-                  <div className="dropdown-divider"></div>
-                  <button 
-                    className="dropdown-item text-danger py-2" 
-                    onClick={handleLogout}
-                  >
-                    <i className="fas fa-sign-out-alt me-2"></i> Logout
-                  </button>
-                </div>
-                <div className="col-6">
-                  <div className="text-muted small">ABHA Health ID</div>
-                  <div className="fw-bold text-primary">{activePatient.abhaId}</div>
-                </div>
-                <div className="col-12">
-                  <div className="text-muted small">Registered Address</div>
-                  <div className="fw-medium text-dark">{activePatient.address}</div>
+                  <div className="row g-2 mt-2">
+                    <div className="col-6">
+                      <div className="text-muted small">ABHA Health ID</div>
+                      <div className="fw-bold text-primary">{activePatient.abhaId || 'N/A'}</div>
+                    </div>
+                    <div className="col-12">
+                      <div className="text-muted small">Registered Address</div>
+                      <div className="fw-medium text-dark">{activePatient.address || 'N/A'}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
