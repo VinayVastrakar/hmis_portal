@@ -29,6 +29,20 @@ export default function Navbar() {
     }
   };
 
+  const handleAddFamilyMember = (e) => {
+    e.preventDefault();
+    // To be implemented later
+    alert('Add Family Member functionality coming soon!');
+    setShowProfileMenu(false);
+  };
+
+  const handleSelectPatient = (patientId) => {
+    // To be implemented later
+    console.log('Patient selected:', patientId);
+    alert('Switch Patient functionality coming soon!');
+    setShowProfileMenu(false);
+  };
+
   const getUserInitials = () => {
     if (!patientData || !patientData.patientName) return 'U';
     const names = patientData.patientName.split(' ');
@@ -209,6 +223,22 @@ export default function Navbar() {
                   <a className="dropdown-item py-2" href="/dashboard#records" onClick={() => setShowProfileMenu(false)}>
                     <i className="fas fa-file-medical me-2 text-primary"></i> Health Records
                   </a>
+                  <div className="dropdown-divider"></div>
+                  
+                  {/* Family Member Options Placeholders */}
+                  <h6 className="dropdown-header text-muted">Family Members</h6>
+                  <button 
+                    className="dropdown-item py-2" 
+                    onClick={() => handleSelectPatient('placeholder-id')}
+                  >
+                    <i className="fas fa-user-friends me-2 text-primary"></i> Switch Patient
+                  </button>
+                  <button 
+                    className="dropdown-item py-2" 
+                    onClick={handleAddFamilyMember}
+                  >
+                    <i className="fas fa-plus-circle me-2 text-primary"></i> Add Family Member
+                  </button>
                   <div className="dropdown-divider"></div>
                   <button 
                     className="dropdown-item text-danger py-2" 
