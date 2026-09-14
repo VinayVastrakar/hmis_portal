@@ -1,20 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 export default function MyAppointments() {
+  const [searchParams] = useSearchParams();
+
   // Navigation State
-  const [activeMenu, setActiveMenu] = useState('opd'); // 'opd', 'lab', 'radiology'
+  const [activeMenu, setActiveMenu] = useState('opd'); // 'opd', 'radiology', 'lab', 'diagnostics'
   const [activeSubTab, setActiveSubTab] = useState('upcoming'); // 'upcoming', 'completed', 'cancelled'
   const [pastFilter, setPastFilter] = useState('all'); // 'all', 'completed', 'cancelled'
+  const [diagnosticTab, setDiagnosticTab] = useState('radiology'); // 'radiology', 'lab', 'all'
 
   // Modal States
-  const [modalType, setModalType] = useState(null); // 'pay', 'reschedule', 'cancel', 'invoice', 'details'
+  const [modalType, setModalType] = useState(null); // 'pay', 'reschedule', 'cancel', 'invoice', 'details', 'report', 'book-radiology', 'book-lab'
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
   // Reschedule Form State
-  const [rescheduleDate, setRescheduleDate] = useState('2026-10-05');
+  const [rescheduleDate, setRescheduleDate] = useState('2026-10-20');
   const [rescheduleTime, setRescheduleTime] = useState('11:00 AM');
 
   // Cancel Form State
@@ -22,6 +26,35 @@ export default function MyAppointments() {
 
   // Payment Method State
   const [paymentMethod, setPaymentMethod] = useState('upi');
+
+  // Diagnostic Test Booking State
+  const [newBookingTest, setNewBookingTest] = useState('X-Ray Chest (PA View)');
+  const [newBookingHospital, setNewBookingHospital] = useState('ARI Hospital, Delhi');
+  const [newBookingDate, setNewBookingDate] = useState('2026-10-18');
+  const [newBookingTime, setNewBookingTime] = useState('Tue, 02:00 PM');
+
+  // URL Parameter Listener (e.g. ?tab=radiology or ?tab=lab or ?action=book-radiology)
+  useEffect(() => {
+    const tab = searchParams.get('tab') || searchParams.get('menu');
+    const action = searchParams.get('action');
+
+    if (tab === 'radiology') {
+      setActiveMenu('radiology');
+      setDiagnosticTab('radiology');
+    } else if (tab === 'lab') {
+      setActiveMenu('lab');
+      setDiagnosticTab('lab');
+    } else if (tab === 'all' || tab === 'diagnostics') {
+      setActiveMenu('diagnostics');
+      setDiagnosticTab('all');
+    }
+
+    if (action === 'book-radiology') {
+      handleOpenBookModal('radiology');
+    } else if (action === 'book-lab') {
+      handleOpenBookModal('lab');
+    }
+  }, [searchParams]);
 
   // Appointments Data
   const [upcomingAppointments, setUpcomingAppointments] = useState([
@@ -106,59 +139,91 @@ export default function MyAppointments() {
     }
   ]);
 
-  // Lab Appointments Sample Data
-  const labAppointments = [
+  // Lab Appointments Data (Matches User Mockup Screenshot 100%)
+  const [labAppointments, setLabAppointments] = useState([
     {
       id: 'lab-1',
-      testName: 'Complete Blood Count (CBC) & ESR',
-      date: '25 Sep 2026',
-      dayTime: 'Thu, 08:30 AM',
-      center: 'ARI Diagnostics Lab, Delhi',
-      sampleStatus: 'Scheduled',
+      date: '18 Sep 2026',
+      dayTime: 'Fri, 08:00 AM',
+      testName: 'Complete Blood Count (CBC)',
+      department: 'Pathology Lab',
+      hospital: 'ARI Hospital, Delhi',
+      location: 'Lab - 1st Floor',
       paymentStatus: 'Paid',
-      amount: 450,
-      reportStatus: 'Pending Sample'
+      amount: 350,
+      status: 'Scheduled',
+      type: 'lab'
     },
     {
       id: 'lab-2',
-      testName: 'Comprehensive Lipid Profile & Liver Function',
-      date: '18 Aug 2026',
-      dayTime: 'Tue, 09:00 AM',
-      center: 'ARI Central Pathology, Delhi',
-      sampleStatus: 'Collected',
+      date: '25 Sep 2026',
+      dayTime: 'Fri, 09:00 AM',
+      testName: 'Thyroid Profile (T3, T4, TSH)',
+      department: 'Endocrinology Lab',
+      hospital: 'ARI Diagnostic Center, Delhi',
+      location: 'Main Pathology Wing',
+      paymentStatus: 'Pending',
+      amount: 500,
+      status: 'Scheduled',
+      type: 'lab'
+    },
+    {
+      id: 'lab-3',
+      date: '02 Oct 2026',
+      dayTime: 'Fri, 08:30 AM',
+      testName: 'Health Checkup Package',
+      department: 'Comprehensive Health',
+      hospital: 'ARI Hospital, Delhi',
+      location: 'Lab - 1st Floor',
       paymentStatus: 'Paid',
-      amount: 950,
-      reportStatus: 'Ready to Download'
+      amount: 1499,
+      status: 'Completed',
+      type: 'lab'
     }
-  ];
+  ]);
 
-  // Radiology Appointments Sample Data
-  const radiologyAppointments = [
+  // Radiology Appointments Data (Matches User Mockup Screenshot 100%)
+  const [radiologyAppointments, setRadiologyAppointments] = useState([
     {
       id: 'rad-1',
-      scanType: 'Chest X-Ray (PA & Lateral View)',
-      date: '24 Sep 2026',
-      dayTime: 'Wed, 02:00 PM',
-      center: 'ARI Imaging Center, Block B',
-      room: 'Scan Room 4',
-      preparation: 'No metallic items or jewelry',
-      status: 'Scheduled',
+      date: '22 Sep 2026',
+      dayTime: 'Tue, 02:00 PM',
+      testName: 'X-Ray Chest (PA View)',
+      department: 'Radiology Dept',
+      hospital: 'ARI Hospital, Delhi',
+      location: 'Radiology - Ground Floor',
       paymentStatus: 'Paid',
-      amount: 850
+      amount: 600,
+      status: 'Scheduled',
+      type: 'radiology'
     },
     {
       id: 'rad-2',
-      scanType: 'MRI Brain with Contrast',
-      date: '02 Aug 2026',
-      dayTime: 'Sun, 11:30 AM',
-      center: 'ARI Advanced Radiology Center',
-      room: 'MRI Suite 1',
-      preparation: '4 hours fasting completed',
-      status: 'Completed',
+      date: '30 Sep 2026',
+      dayTime: 'Wed, 11:00 AM',
+      testName: 'Ultrasound Abdomen',
+      department: 'USG Department',
+      hospital: 'ARI Diagnostic Center, Delhi',
+      location: 'Ultrasound Suite 2',
+      paymentStatus: 'Pending',
+      amount: 1200,
+      status: 'Scheduled',
+      type: 'radiology'
+    },
+    {
+      id: 'rad-3',
+      date: '05 Oct 2026',
+      dayTime: 'Mon, 10:00 AM',
+      testName: 'MRI Brain',
+      department: 'Advanced Imaging',
+      hospital: 'City Scan Center, Delhi',
+      location: 'MRI Center - Ground Floor',
       paymentStatus: 'Paid',
-      amount: 3200
+      amount: 4500,
+      status: 'Completed',
+      type: 'radiology'
     }
-  ];
+  ]);
 
   const showToast = (message, type = 'success') => {
     setToastMessage({ text: message, type });
@@ -175,35 +240,77 @@ export default function MyAppointments() {
 
   const handleProcessPayment = () => {
     if (!selectedAppointment) return;
-    setUpcomingAppointments(prev =>
-      prev.map(item =>
-        item.id === selectedAppointment.id
-          ? { ...item, paymentStatus: 'Paid', status: 'confirmed' }
-          : item
-      )
-    );
+    const displayName = selectedAppointment.testName || selectedAppointment.doctor;
+
+    if (selectedAppointment.type === 'lab') {
+      setLabAppointments(prev =>
+        prev.map(item =>
+          item.id === selectedAppointment.id
+            ? { ...item, paymentStatus: 'Paid' }
+            : item
+        )
+      );
+    } else if (selectedAppointment.type === 'radiology') {
+      setRadiologyAppointments(prev =>
+        prev.map(item =>
+          item.id === selectedAppointment.id
+            ? { ...item, paymentStatus: 'Paid' }
+            : item
+        )
+      );
+    } else {
+      setUpcomingAppointments(prev =>
+        prev.map(item =>
+          item.id === selectedAppointment.id
+            ? { ...item, paymentStatus: 'Paid', status: 'confirmed' }
+            : item
+        )
+      );
+    }
+
     setModalType(null);
-    showToast(`Payment of ₹${selectedAppointment.amount} successful for ${selectedAppointment.doctor}!`);
+    showToast(`Payment of ₹${selectedAppointment.amount.toLocaleString()} successful for ${displayName}!`);
   };
 
   const handleOpenReschedule = (app) => {
     setSelectedAppointment(app);
-    setRescheduleDate('2026-10-05');
+    setRescheduleDate('2026-10-25');
     setRescheduleTime('11:00 AM');
     setModalType('reschedule');
   };
 
   const handleConfirmReschedule = () => {
     if (!selectedAppointment) return;
-    setUpcomingAppointments(prev =>
-      prev.map(item =>
-        item.id === selectedAppointment.id
-          ? { ...item, date: rescheduleDate, dayTime: rescheduleTime }
-          : item
-      )
-    );
+    const displayName = selectedAppointment.testName || selectedAppointment.doctor;
+
+    if (selectedAppointment.type === 'lab') {
+      setLabAppointments(prev =>
+        prev.map(item =>
+          item.id === selectedAppointment.id
+            ? { ...item, date: rescheduleDate, dayTime: rescheduleTime }
+            : item
+        )
+      );
+    } else if (selectedAppointment.type === 'radiology') {
+      setRadiologyAppointments(prev =>
+        prev.map(item =>
+          item.id === selectedAppointment.id
+            ? { ...item, date: rescheduleDate, dayTime: rescheduleTime }
+            : item
+        )
+      );
+    } else {
+      setUpcomingAppointments(prev =>
+        prev.map(item =>
+          item.id === selectedAppointment.id
+            ? { ...item, date: rescheduleDate, dayTime: rescheduleTime }
+            : item
+        )
+      );
+    }
+
     setModalType(null);
-    showToast(`Appointment rescheduled with ${selectedAppointment.doctor} to ${rescheduleDate} at ${rescheduleTime}!`);
+    showToast(`Appointment rescheduled for ${displayName} to ${rescheduleDate} at ${rescheduleTime}!`);
   };
 
   const handleOpenCancel = (app) => {
@@ -214,19 +321,39 @@ export default function MyAppointments() {
 
   const handleConfirmCancel = () => {
     if (!selectedAppointment) return;
-    // Remove from upcoming and add to past with cancelled status
-    setUpcomingAppointments(prev => prev.filter(item => item.id !== selectedAppointment.id));
-    setPastAppointments(prev => [
-      {
-        ...selectedAppointment,
-        id: `past-cancelled-${Date.now()}`,
-        status: 'cancelled',
-        tokenNo: '-'
-      },
-      ...prev
-    ]);
+    const displayName = selectedAppointment.testName || selectedAppointment.doctor;
+
+    if (selectedAppointment.type === 'lab') {
+      setLabAppointments(prev =>
+        prev.map(item =>
+          item.id === selectedAppointment.id
+            ? { ...item, status: 'Cancelled' }
+            : item
+        )
+      );
+    } else if (selectedAppointment.type === 'radiology') {
+      setRadiologyAppointments(prev =>
+        prev.map(item =>
+          item.id === selectedAppointment.id
+            ? { ...item, status: 'Cancelled' }
+            : item
+        )
+      );
+    } else {
+      setUpcomingAppointments(prev => prev.filter(item => item.id !== selectedAppointment.id));
+      setPastAppointments(prev => [
+        {
+          ...selectedAppointment,
+          id: `past-cancelled-${Date.now()}`,
+          status: 'cancelled',
+          tokenNo: '-'
+        },
+        ...prev
+      ]);
+    }
+
     setModalType(null);
-    showToast(`Appointment with ${selectedAppointment.doctor} has been cancelled.`, 'info');
+    showToast(`Appointment for ${displayName} has been cancelled.`, 'info');
   };
 
   const handleOpenInvoice = (app) => {
@@ -234,9 +361,90 @@ export default function MyAppointments() {
     setModalType('invoice');
   };
 
+  const handleOpenReport = (app) => {
+    setSelectedAppointment(app);
+    setModalType('report');
+  };
+
   const handleOpenDetails = (app) => {
     setSelectedAppointment(app);
     setModalType('details');
+  };
+
+  const handleOpenBookModal = (type) => {
+    if (type === 'lab') {
+      setNewBookingTest('Complete Blood Count (CBC)');
+      setNewBookingHospital('ARI Hospital, Delhi');
+      setNewBookingDate('2026-10-15');
+      setNewBookingTime('Fri, 08:00 AM');
+      setModalType('book-lab');
+    } else {
+      setNewBookingTest('X-Ray Chest (PA View)');
+      setNewBookingHospital('ARI Hospital, Delhi');
+      setNewBookingDate('2026-10-18');
+      setNewBookingTime('Tue, 02:00 PM');
+      setModalType('book-radiology');
+    }
+  };
+
+  const handleConfirmBookTest = (type) => {
+    if (type === 'lab') {
+      const priceMap = {
+        'Complete Blood Count (CBC)': { price: 350, dept: 'Pathology Lab' },
+        'Thyroid Profile (T3, T4, TSH)': { price: 500, dept: 'Endocrinology Lab' },
+        'Health Checkup Package': { price: 1499, dept: 'Comprehensive Health' },
+        'Lipid Profile': { price: 750, dept: 'Biochemistry Lab' },
+        'HbA1c Diabetes Screen': { price: 450, dept: 'Pathology Lab' },
+        'Liver Function Test (LFT)': { price: 650, dept: 'Biochemistry Lab' }
+      };
+      const info = priceMap[newBookingTest] || { price: 500, dept: 'Pathology Lab' };
+      const newApp = {
+        id: `lab-${Date.now()}`,
+        date: newBookingDate,
+        dayTime: newBookingTime,
+        testName: newBookingTest,
+        department: info.dept,
+        hospital: newBookingHospital,
+        location: 'Lab - 1st Floor',
+        paymentStatus: 'Pending',
+        amount: info.price,
+        status: 'Scheduled',
+        type: 'lab'
+      };
+      setLabAppointments(prev => [newApp, ...prev]);
+      setModalType(null);
+      setActiveMenu('lab');
+      setDiagnosticTab('lab');
+      showToast(`Booked ${newBookingTest} at ${newBookingHospital}!`);
+    } else {
+      const priceMap = {
+        'X-Ray Chest (PA View)': { price: 600, dept: 'Radiology Dept' },
+        'Ultrasound Abdomen': { price: 1200, dept: 'USG Department' },
+        'MRI Brain': { price: 4500, dept: 'Advanced Imaging' },
+        'CT Scan Thorax': { price: 2800, dept: 'Computed Tomography' },
+        'Spine MRI (Lumbar)': { price: 4200, dept: 'Advanced Imaging' },
+        'Digital Mammography': { price: 1800, dept: "Women's Imaging" }
+      };
+      const info = priceMap[newBookingTest] || { price: 1000, dept: 'Radiology Dept' };
+      const newApp = {
+        id: `rad-${Date.now()}`,
+        date: newBookingDate,
+        dayTime: newBookingTime,
+        testName: newBookingTest,
+        department: info.dept,
+        hospital: newBookingHospital,
+        location: 'Radiology - Ground Floor',
+        paymentStatus: 'Pending',
+        amount: info.price,
+        status: 'Scheduled',
+        type: 'radiology'
+      };
+      setRadiologyAppointments(prev => [newApp, ...prev]);
+      setModalType(null);
+      setActiveMenu('radiology');
+      setDiagnosticTab('radiology');
+      showToast(`Booked ${newBookingTest} at ${newBookingHospital}!`);
+    }
   };
 
   // Filtered past appointments based on status dropdown
@@ -244,6 +452,400 @@ export default function MyAppointments() {
     if (pastFilter === 'all') return true;
     return app.status === pastFilter;
   });
+
+  // ========================================================
+  // REUSABLE DIAGNOSTIC COMPONENT: LAB APPOINTMENTS CARD
+  // ========================================================
+  const renderLabCard = () => (
+    <div className="appointments-section-card mb-4" id="lab-appointments-section">
+      {/* Mint Green Banner */}
+      <div className="section-banner-lab">
+        <div className="section-header-info d-flex align-items-center gap-3">
+          <div className="banner-icon-lab">
+            <i className="fas fa-flask"></i>
+          </div>
+          <div>
+            <h3 className="section-title">Lab Appointments</h3>
+            <p className="section-subtitle">View, manage and take action on your lab test appointments.</p>
+          </div>
+        </div>
+        <div>
+          <button
+            type="button"
+            className="btn-book-lab"
+            onClick={() => handleOpenBookModal('lab')}
+          >
+            <i className="fas fa-flask"></i> Book Lab Test
+          </button>
+        </div>
+      </div>
+
+      {/* Lab Appointments Table */}
+      <div className="ari-table-responsive">
+        <table className="ari-appointments-table">
+          <thead>
+            <tr>
+              <th>Date &amp; Time</th>
+              <th>Test / Package</th>
+              <th>Hospital / Location</th>
+              <th>Payment Status</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {labAppointments.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="text-center py-5 text-muted">
+                  No lab test appointments found.
+                </td>
+              </tr>
+            ) : (
+              labAppointments.map((app) => (
+                <tr key={app.id}>
+                  {/* Date & Time */}
+                  <td>
+                    <div className="table-date-cell">
+                      <span className="table-date-main">{app.date}</span>
+                      <span className="table-date-sub">{app.dayTime}</span>
+                    </div>
+                  </td>
+
+                  {/* Test / Package */}
+                  <td>
+                    <div className="fw-bold text-dark">{app.testName}</div>
+                    <small className="text-muted">{app.department}</small>
+                  </td>
+
+                  {/* Hospital / Location */}
+                  <td>
+                    <div className="table-location-cell">
+                      <span className="table-hospital-name">{app.hospital}</span>
+                      <span className="table-room-no">{app.location}</span>
+                    </div>
+                  </td>
+
+                  {/* Payment Status */}
+                  <td>
+                    <div className="table-payment-cell">
+                      {app.paymentStatus === 'Paid' ? (
+                        <span className="payment-badge payment-badge-paid">Paid</span>
+                      ) : (
+                        <span className="payment-badge payment-badge-pending">Pending</span>
+                      )}
+                      <span className="payment-amount">₹{app.amount.toLocaleString()}</span>
+                    </div>
+                  </td>
+
+                  {/* Status */}
+                  <td>
+                    {app.status === 'Completed' ? (
+                      <span className="status-pill status-pill-completed">Completed</span>
+                    ) : app.status === 'Cancelled' ? (
+                      <span className="status-pill status-pill-cancelled">Cancelled</span>
+                    ) : (
+                      <span className="status-pill status-pill-scheduled">Scheduled</span>
+                    )}
+                  </td>
+
+                  {/* Actions (Clean text matching user mockup) */}
+                  <td>
+                    <div className="action-buttons-group">
+                      {app.status === 'Scheduled' && app.paymentStatus === 'Paid' && (
+                        <>
+                          <button
+                            type="button"
+                            className="btn-action-outline"
+                            onClick={() => handleOpenInvoice(app)}
+                          >
+                            View Invoice
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-action-outline"
+                            onClick={() => handleOpenReschedule(app)}
+                          >
+                            Reschedule
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-action-cancel"
+                            onClick={() => handleOpenCancel(app)}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      )}
+
+                      {app.status === 'Scheduled' && app.paymentStatus === 'Pending' && (
+                        <>
+                          <button
+                            type="button"
+                            className="btn-action-pay"
+                            onClick={() => handleOpenPayModal(app)}
+                          >
+                            Pay Now
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-action-outline"
+                            onClick={() => handleOpenReschedule(app)}
+                          >
+                            Reschedule
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-action-cancel"
+                            onClick={() => handleOpenCancel(app)}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      )}
+
+                      {app.status === 'Completed' && (
+                        <>
+                          <button
+                            type="button"
+                            className="btn-action-outline"
+                            onClick={() => handleOpenReport(app)}
+                          >
+                            View Report
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-action-outline"
+                            onClick={() => handleOpenInvoice(app)}
+                          >
+                            View Invoice
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-action-disabled"
+                            disabled
+                            title="Completed tests cannot be cancelled"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      )}
+
+                      {app.status === 'Cancelled' && (
+                        <button
+                          type="button"
+                          className="btn-action-outline"
+                          onClick={() => handleOpenDetails(app)}
+                        >
+                          View Details
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  // ========================================================
+  // REUSABLE DIAGNOSTIC COMPONENT: RADIOLOGY APPOINTMENTS CARD
+  // ========================================================
+  const renderRadiologyCard = () => (
+    <div className="appointments-section-card mb-4" id="radiology-appointments-section">
+      {/* Lavender Banner */}
+      <div className="section-banner-radiology">
+        <div className="section-header-info d-flex align-items-center gap-3">
+          <div className="banner-icon-radiology">
+            <i className="fas fa-x-ray"></i>
+          </div>
+          <div>
+            <h3 className="section-title">Radiology Appointments</h3>
+            <p className="section-subtitle">View, manage and take action on your radiology appointments.</p>
+          </div>
+        </div>
+        <div>
+          <button
+            type="button"
+            className="btn-book-radiology"
+            onClick={() => handleOpenBookModal('radiology')}
+          >
+            <i className="fas fa-x-ray"></i> Book Radiology Test
+          </button>
+        </div>
+      </div>
+
+      {/* Radiology Appointments Table */}
+      <div className="ari-table-responsive">
+        <table className="ari-appointments-table">
+          <thead>
+            <tr>
+              <th>Date &amp; Time</th>
+              <th>Test / Procedure</th>
+              <th>Hospital / Location</th>
+              <th>Payment Status</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {radiologyAppointments.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="text-center py-5 text-muted">
+                  No radiology appointments found.
+                </td>
+              </tr>
+            ) : (
+              radiologyAppointments.map((app) => (
+                <tr key={app.id}>
+                  {/* Date & Time */}
+                  <td>
+                    <div className="table-date-cell">
+                      <span className="table-date-main">{app.date}</span>
+                      <span className="table-date-sub">{app.dayTime}</span>
+                    </div>
+                  </td>
+
+                  {/* Test / Procedure */}
+                  <td>
+                    <div className="fw-bold text-dark">{app.testName}</div>
+                    <small className="text-muted">{app.department}</small>
+                  </td>
+
+                  {/* Hospital / Location */}
+                  <td>
+                    <div className="table-location-cell">
+                      <span className="table-hospital-name">{app.hospital}</span>
+                      <span className="table-room-no">{app.location}</span>
+                    </div>
+                  </td>
+
+                  {/* Payment Status */}
+                  <td>
+                    <div className="table-payment-cell">
+                      {app.paymentStatus === 'Paid' ? (
+                        <span className="payment-badge payment-badge-paid">Paid</span>
+                      ) : (
+                        <span className="payment-badge payment-badge-pending">Pending</span>
+                      )}
+                      <span className="payment-amount">₹{app.amount.toLocaleString()}</span>
+                    </div>
+                  </td>
+
+                  {/* Status */}
+                  <td>
+                    {app.status === 'Completed' ? (
+                      <span className="status-pill status-pill-completed">Completed</span>
+                    ) : app.status === 'Cancelled' ? (
+                      <span className="status-pill status-pill-cancelled">Cancelled</span>
+                    ) : (
+                      <span className="status-pill status-pill-scheduled">Scheduled</span>
+                    )}
+                  </td>
+
+                  {/* Actions (Clean text matching user mockup) */}
+                  <td>
+                    <div className="action-buttons-group">
+                      {app.status === 'Scheduled' && app.paymentStatus === 'Paid' && (
+                        <>
+                          <button
+                            type="button"
+                            className="btn-action-outline"
+                            onClick={() => handleOpenInvoice(app)}
+                          >
+                            View Invoice
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-action-outline"
+                            onClick={() => handleOpenReschedule(app)}
+                          >
+                            Reschedule
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-action-cancel"
+                            onClick={() => handleOpenCancel(app)}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      )}
+
+                      {app.status === 'Scheduled' && app.paymentStatus === 'Pending' && (
+                        <>
+                          <button
+                            type="button"
+                            className="btn-action-pay"
+                            onClick={() => handleOpenPayModal(app)}
+                          >
+                            Pay Now
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-action-outline"
+                            onClick={() => handleOpenReschedule(app)}
+                          >
+                            Reschedule
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-action-cancel"
+                            onClick={() => handleOpenCancel(app)}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      )}
+
+                      {app.status === 'Completed' && (
+                        <>
+                          <button
+                            type="button"
+                            className="btn-action-outline"
+                            onClick={() => handleOpenReport(app)}
+                          >
+                            View Report
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-action-outline"
+                            onClick={() => handleOpenInvoice(app)}
+                          >
+                            View Invoice
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-action-disabled"
+                            disabled
+                            title="Completed tests cannot be cancelled"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      )}
+
+                      {app.status === 'Cancelled' && (
+                        <button
+                          type="button"
+                          className="btn-action-outline"
+                          onClick={() => handleOpenDetails(app)}
+                        >
+                          View Details
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 
   return (
     <div className="appointments-page">
@@ -276,32 +878,42 @@ export default function MyAppointments() {
               </li>
               <li>
                 <button
-                  className={`sidebar-nav-btn ${activeMenu === 'lab' ? 'active' : ''}`}
-                  onClick={() => setActiveMenu('lab')}
-                  type="button"
-                >
-                  <span className="sidebar-item-left">
-                    <span className="sidebar-item-icon">
-                      <i className="fas fa-flask"></i>
-                    </span>
-                    <span>Lab Appointments</span>
-                  </span>
-                  <span className="sidebar-badge">{labAppointments.length}</span>
-                </button>
-              </li>
-              <li>
-                <button
                   className={`sidebar-nav-btn ${activeMenu === 'radiology' ? 'active' : ''}`}
-                  onClick={() => setActiveMenu('radiology')}
+                  onClick={() => {
+                    setActiveMenu('radiology');
+                    setDiagnosticTab('radiology');
+                  }}
                   type="button"
                 >
                   <span className="sidebar-item-left">
-                    <span className="sidebar-item-icon">
+                    <span className="sidebar-item-icon" style={{ background: '#EDE9FE', color: '#7C3AED' }}>
                       <i className="fas fa-x-ray"></i>
                     </span>
                     <span>Radiology Appointments</span>
                   </span>
-                  <span className="sidebar-badge">{radiologyAppointments.length}</span>
+                  <span className="sidebar-badge" style={{ background: '#EDE9FE', color: '#7C3AED' }}>
+                    {radiologyAppointments.length}
+                  </span>
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`sidebar-nav-btn ${activeMenu === 'lab' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveMenu('lab');
+                    setDiagnosticTab('lab');
+                  }}
+                  type="button"
+                >
+                  <span className="sidebar-item-left">
+                    <span className="sidebar-item-icon" style={{ background: '#D1FAE5', color: '#059669' }}>
+                      <i className="fas fa-flask"></i>
+                    </span>
+                    <span>Lab Appointments</span>
+                  </span>
+                  <span className="sidebar-badge" style={{ background: '#D1FAE5', color: '#059669' }}>
+                    {labAppointments.length}
+                  </span>
                 </button>
               </li>
             </ul>
@@ -309,11 +921,14 @@ export default function MyAppointments() {
 
           {/* Right Main Content Area */}
           <div className="appointments-main-content">
+            {/* Top Category Navigation Pills Bar */}
+         
+
             {/* VIEW 1: OPD CONSULTATIONS */}
             {activeMenu === 'opd' && (
               <>
                 {/* Header and Sub-tabs */}
-                <div className="appointments-header-row">
+                <div className="appointments-header-row mb-3">
                   <h1 className="appointments-page-title">OPD Consultations</h1>
                   <div className="appointment-subtabs">
                     <button
@@ -352,6 +967,9 @@ export default function MyAppointments() {
                   </div>
                 </div>
 
+                {/* Quick Banner for Diagnostics */}
+            
+
                 {/* Section 1: Upcoming Appointments (Token No. REMOVED as requested) */}
                 {activeSubTab === 'upcoming' && (
                   <div className="appointments-section-card">
@@ -375,415 +993,343 @@ export default function MyAppointments() {
                             <th>Doctor</th>
                             <th>Specialty</th>
                             <th>Hospital / Location</th>
-                            {/* Token No. Column removed as requested */}
                             <th>Payment Status</th>
                             <th>Action</th>
                           </tr>
                         </thead>
-                          <tbody>
-                            {upcomingAppointments.length === 0 ? (
-                              <tr>
-                                <td colSpan="6" className="text-center py-5 text-muted">
-                                  No upcoming appointments found.
-                                </td>
-                              </tr>
-                            ) : (
-                              upcomingAppointments.map((app) => (
-                                <tr key={app.id}>
-                                  {/* Date & Time */}
-                                  <td>
-                                    <div className="table-date-cell">
-                                      <span className="table-date-main">{app.date}</span>
-                                      <span className="table-date-sub">{app.dayTime}</span>
-                                    </div>
-                                  </td>
-
-                                  {/* Doctor */}
-                                  <td>
-                                    <div className="table-doctor-name">{app.doctor}</div>
-                                  </td>
-
-                                  {/* Specialty */}
-                                  <td>
-                                    <span className="table-specialty-badge">{app.specialty}</span>
-                                  </td>
-
-                                  {/* Hospital / Location */}
-                                  <td>
-                                    <div className="table-location-cell">
-                                      <span className="table-hospital-name">{app.hospital}</span>
-                                      <span className="table-room-no">{app.room}</span>
-                                    </div>
-                                  </td>
-
-                                  {/* Payment Status */}
-                                  <td>
-                                    <div className="table-payment-cell">
-                                      {app.paymentStatus === 'Paid' ? (
-                                        <span className="payment-badge payment-badge-paid">
-                                          <i className="fas fa-check"></i> Paid
-                                        </span>
-                                      ) : (
-                                        <span className="payment-badge payment-badge-pending">
-                                          <i className="fas fa-exclamation-circle"></i> Pending
-                                        </span>
-                                      )}
-                                      <span className="payment-amount">₹{app.amount}</span>
-                                    </div>
-                                  </td>
-
-                                  {/* Actions */}
-                                  <td>
-                                    <div className="action-buttons-group">
-                                      {app.paymentStatus === 'Pending' ? (
-                                        <button
-                                          type="button"
-                                          className="btn-action-pay"
-                                          onClick={() => handleOpenPayModal(app)}
-                                        >
-                                          <i className="fas fa-credit-card"></i> Pay Now
-                                        </button>
-                                      ) : (
-                                        <button
-                                          type="button"
-                                          className="btn-action-outline"
-                                          onClick={() => handleOpenInvoice(app)}
-                                        >
-                                          <i className="fas fa-file-invoice"></i> View Invoice
-                                        </button>
-                                      )}
-
-                                      <button
-                                        type="button"
-                                        className="btn-action-outline"
-                                        onClick={() => handleOpenReschedule(app)}
-                                      >
-                                        <i className="fas fa-calendar-alt"></i> Reschedule
-                                      </button>
-
-                                      <button
-                                        type="button"
-                                        className="btn-action-cancel"
-                                        onClick={() => handleOpenCancel(app)}
-                                      >
-                                        <i className="fas fa-times-circle"></i> Cancel
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              ))
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Section 2: Past Appointments (Token No. preserved, Status dropdown filter & pagination) */}
-                  {activeSubTab !== 'upcoming' && (
-                    <div className="appointments-section-card">
-                      <div className="section-card-header">
-                        <div className="section-header-info">
-                          <div className="section-icon-badge">
-                            <i className="fas fa-history"></i>
-                          </div>
-                          <div>
-                            <h3 className="section-title">
-                              Past Appointments ({filteredPastAppointments.length})
-                            </h3>
-                            <p className="section-subtitle">
-                              View your completed and cancelled OPD appointments.
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Status Filter */}
-                        <div>
-                          <select
-                            className="status-filter-select"
-                            value={pastFilter}
-                            onChange={(e) => setPastFilter(e.target.value)}
-                          >
-                            <option value="all">All Status</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="ari-table-responsive">
-                        <table className="ari-appointments-table">
-                          <thead>
+                        <tbody>
+                          {upcomingAppointments.length === 0 ? (
                             <tr>
-                              <th>Date &amp; Time</th>
-                              <th>Doctor</th>
-                              <th>Specialty</th>
-                              <th>Hospital / Location</th>
-                              <th>Token No.</th>
-                              <th>Payment Status</th>
-                              <th>Status</th>
-                              <th>Action</th>
+                              <td colSpan="6" className="text-center py-5 text-muted">
+                                No upcoming appointments found.
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody>
-                            {filteredPastAppointments.length === 0 ? (
-                              <tr>
-                                <td colSpan="8" className="text-center py-5 text-muted">
-                                  No past appointments match the selected filter.
+                          ) : (
+                            upcomingAppointments.map((app) => (
+                              <tr key={app.id}>
+                                <td>
+                                  <div className="table-date-cell">
+                                    <span className="table-date-main">{app.date}</span>
+                                    <span className="table-date-sub">{app.dayTime}</span>
+                                  </div>
                                 </td>
-                              </tr>
-                            ) : (
-                              filteredPastAppointments.map((app) => (
-                                <tr key={app.id}>
-                                  {/* Date & Time */}
-                                  <td>
-                                    <div className="table-date-cell">
-                                      <span className="table-date-main">{app.date}</span>
-                                      <span className="table-date-sub">{app.dayTime}</span>
-                                    </div>
-                                  </td>
-
-                                  {/* Doctor */}
-                                  <td>
-                                    <div className="table-doctor-name">{app.doctor}</div>
-                                  </td>
-
-                                  {/* Specialty */}
-                                  <td>
-                                    <span className="table-specialty-badge">{app.specialty}</span>
-                                  </td>
-
-                                  {/* Hospital / Location */}
-                                  <td>
-                                    <div className="table-location-cell">
-                                      <span className="table-hospital-name">{app.hospital}</span>
-                                      <span className="table-room-no">{app.room}</span>
-                                    </div>
-                                  </td>
-
-                                  {/* Token No. */}
-                                  <td>
-                                    {app.tokenNo && app.tokenNo !== '-' ? (
-                                      <span className="table-token-pill">{app.tokenNo}</span>
+                                <td>
+                                  <div className="table-doctor-name">{app.doctor}</div>
+                                </td>
+                                <td>
+                                  <span className="table-specialty-badge">{app.specialty}</span>
+                                </td>
+                                <td>
+                                  <div className="table-location-cell">
+                                    <span className="table-hospital-name">{app.hospital}</span>
+                                    <span className="table-room-no">{app.room}</span>
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="table-payment-cell">
+                                    {app.paymentStatus === 'Paid' ? (
+                                      <span className="payment-badge payment-badge-paid">Paid</span>
                                     ) : (
-                                      <span className="text-muted">-</span>
+                                      <span className="payment-badge payment-badge-pending">Pending</span>
                                     )}
-                                  </td>
-
-                                  {/* Payment Status */}
-                                  <td>
-                                    <div className="table-payment-cell">
-                                      <span className="payment-badge payment-badge-paid">
-                                        <i className="fas fa-check"></i> Paid
-                                      </span>
-                                      <span className="payment-amount">₹{app.amount}</span>
-                                    </div>
-                                  </td>
-
-                                  {/* Appointment Status */}
-                                  <td>
-                                    {app.status === 'completed' ? (
-                                      <span className="status-pill status-pill-completed">
-                                        <i className="fas fa-check-circle"></i> Completed
-                                      </span>
+                                    <span className="payment-amount">₹{app.amount}</span>
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="action-buttons-group">
+                                    {app.paymentStatus === 'Pending' ? (
+                                      <button
+                                        type="button"
+                                        className="btn-action-pay"
+                                        onClick={() => handleOpenPayModal(app)}
+                                      >
+                                        Pay Now
+                                      </button>
                                     ) : (
-                                      <span className="status-pill status-pill-cancelled">
-                                        <i className="fas fa-times-circle"></i> Cancelled
-                                      </span>
-                                    )}
-                                  </td>
-
-                                  {/* Action */}
-                                  <td>
-                                    {app.status === 'completed' ? (
                                       <button
                                         type="button"
                                         className="btn-action-outline"
                                         onClick={() => handleOpenInvoice(app)}
                                       >
-                                        <i className="fas fa-file-invoice"></i> View Invoice
-                                      </button>
-                                    ) : (
-                                      <button
-                                        type="button"
-                                        className="btn-action-outline"
-                                        onClick={() => handleOpenDetails(app)}
-                                      >
-                                        <i className="fas fa-info-circle"></i> View Details
+                                        View Invoice
                                       </button>
                                     )}
-                                  </td>
-                                </tr>
-                              ))
-                            )}
-                          </tbody>
-                        </table>
+                                    <button
+                                      type="button"
+                                      className="btn-action-outline"
+                                      onClick={() => handleOpenReschedule(app)}
+                                    >
+                                      Reschedule
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="btn-action-cancel"
+                                      onClick={() => handleOpenCancel(app)}
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Section 2: Past Appointments (Token No. preserved) */}
+                {activeSubTab !== 'upcoming' && (
+                  <div className="appointments-section-card">
+                    <div className="section-card-header">
+                      <div className="section-header-info">
+                        <div className="section-icon-badge">
+                          <i className="fas fa-history"></i>
+                        </div>
+                        <div>
+                          <h3 className="section-title">
+                            Past Appointments ({filteredPastAppointments.length})
+                          </h3>
+                          <p className="section-subtitle">
+                            View your completed and cancelled OPD appointments.
+                          </p>
+                        </div>
                       </div>
 
-                      {/* Pagination Controls */}
-                      <div className="section-card-footer">
-                        <div className="pagination-info">
-                          Showing 1 to {filteredPastAppointments.length} of {filteredPastAppointments.length} appointments
-                        </div>
-                        <div className="pagination-controls">
-                          <button type="button" className="pagination-btn" disabled>
-                            <i className="fas fa-chevron-left"></i>
-                          </button>
-                          <button type="button" className="pagination-btn active">
-                            1
-                          </button>
-                          <button type="button" className="pagination-btn" disabled>
-                            <i className="fas fa-chevron-right"></i>
-                          </button>
-                        </div>
+                      {/* Status Filter */}
+                      <div>
+                        <select
+                          className="status-filter-select"
+                          value={pastFilter}
+                          onChange={(e) => setPastFilter(e.target.value)}
+                        >
+                          <option value="all">All Status</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
                       </div>
                     </div>
-                  )}
-                </>
-              )}
 
-              {/* VIEW 2: LAB APPOINTMENTS */}
-              {activeMenu === 'lab' && (
-                <div className="appointments-section-card">
-                  <div className="section-card-header">
-                    <div className="section-header-info">
-                      <div className="section-icon-badge" style={{ background: '#F0FDF4', color: '#16A34A' }}>
-                        <i className="fas fa-flask"></i>
+                    <div className="ari-table-responsive">
+                      <table className="ari-appointments-table">
+                        <thead>
+                          <tr>
+                            <th>Date &amp; Time</th>
+                            <th>Doctor</th>
+                            <th>Specialty</th>
+                            <th>Hospital / Location</th>
+                            <th>Token No.</th>
+                            <th>Payment Status</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredPastAppointments.length === 0 ? (
+                            <tr>
+                              <td colSpan="8" className="text-center py-5 text-muted">
+                                No past appointments match the selected filter.
+                              </td>
+                            </tr>
+                          ) : (
+                            filteredPastAppointments.map((app) => (
+                              <tr key={app.id}>
+                                <td>
+                                  <div className="table-date-cell">
+                                    <span className="table-date-main">{app.date}</span>
+                                    <span className="table-date-sub">{app.dayTime}</span>
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="table-doctor-name">{app.doctor}</div>
+                                </td>
+                                <td>
+                                  <span className="table-specialty-badge">{app.specialty}</span>
+                                </td>
+                                <td>
+                                  <div className="table-location-cell">
+                                    <span className="table-hospital-name">{app.hospital}</span>
+                                    <span className="table-room-no">{app.room}</span>
+                                  </div>
+                                </td>
+                                <td>
+                                  {app.tokenNo && app.tokenNo !== '-' ? (
+                                    <span className="table-token-pill">{app.tokenNo}</span>
+                                  ) : (
+                                    <span className="text-muted">-</span>
+                                  )}
+                                </td>
+                                <td>
+                                  <div className="table-payment-cell">
+                                    <span className="payment-badge payment-badge-paid">Paid</span>
+                                    <span className="payment-amount">₹{app.amount}</span>
+                                  </div>
+                                </td>
+                                <td>
+                                  {app.status === 'completed' ? (
+                                    <span className="status-pill status-pill-completed">Completed</span>
+                                  ) : (
+                                    <span className="status-pill status-pill-cancelled">Cancelled</span>
+                                  )}
+                                </td>
+                                <td>
+                                  {app.status === 'completed' ? (
+                                    <button
+                                      type="button"
+                                      className="btn-action-outline"
+                                      onClick={() => handleOpenInvoice(app)}
+                                    >
+                                      View Invoice
+                                    </button>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      className="btn-action-outline"
+                                      onClick={() => handleOpenDetails(app)}
+                                    >
+                                      View Details
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Pagination Controls */}
+                    <div className="section-card-footer">
+                      <div className="pagination-info">
+                        Showing 1 to {filteredPastAppointments.length} of {filteredPastAppointments.length} appointments
                       </div>
-                      <div>
-                        <h3 className="section-title">Lab Appointments &amp; Diagnostics ({labAppointments.length})</h3>
-                        <p className="section-subtitle">Track sample collection, testing progress, and download medical reports.</p>
+                      <div className="pagination-controls">
+                        <button type="button" className="pagination-btn" disabled>
+                          <i className="fas fa-chevron-left"></i>
+                        </button>
+                        <button type="button" className="pagination-btn active">
+                          1
+                        </button>
+                        <button type="button" className="pagination-btn" disabled>
+                          <i className="fas fa-chevron-right"></i>
+                        </button>
                       </div>
                     </div>
                   </div>
+                )}
+              </>
+            )}
 
-                  <div className="ari-table-responsive">
-                    <table className="ari-appointments-table">
-                      <thead>
-                        <tr>
-                          <th>Test Details</th>
-                          <th>Date &amp; Time</th>
-                          <th>Diagnostic Center</th>
-                          <th>Sample Status</th>
-                          <th>Payment Status</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {labAppointments.map((lab) => (
-                          <tr key={lab.id}>
-                            <td>
-                              <div className="fw-bold text-dark">{lab.testName}</div>
-                              <small className="text-muted">Pathology Department</small>
-                            </td>
-                            <td>
-                              <div className="table-date-cell">
-                                <span className="table-date-main">{lab.date}</span>
-                                <span className="table-date-sub">{lab.dayTime}</span>
-                              </div>
-                            </td>
-                            <td>
-                              <div className="fw-medium">{lab.center}</div>
-                            </td>
-                            <td>
-                              <span className={`status-pill ${lab.sampleStatus === 'Collected' ? 'status-pill-completed' : 'status-pill-pending'}`}>
-                                {lab.sampleStatus}
-                              </span>
-                            </td>
-                            <td>
-                              <div className="table-payment-cell">
-                                <span className="payment-badge payment-badge-paid">Paid</span>
-                                <span className="payment-amount">₹{lab.amount}</span>
-                              </div>
-                            </td>
-                            <td>
-                              <button
-                                type="button"
-                                className="btn-action-outline"
-                                onClick={() => showToast(`Report download started for ${lab.testName}`)}
-                              >
-                                <i className="fas fa-download"></i> {lab.reportStatus === 'Ready to Download' ? 'Download Report' : 'Track Sample'}
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+            {/* VIEW 2: RADIOLOGY APPOINTMENTS (Primary view when clicking Radiology Appointments) */}
+            {activeMenu === 'radiology' && (
+              <div className="diagnostics-view-container">
+                {/* Header and Filter Sub-tabs */}
+                <div className="appointments-header-row mb-4">
+                  <div>
+                    <h1 className="appointments-page-title">Radiology Appointments</h1>
+                    <p className="text-muted small mb-0">
+                      View, manage and take action on your radiology appointments.
+                    </p>
+                  </div>
+                
+                </div>
+
+                {/* Primary Card: Radiology Card (Lavender Banner) */}
+                {renderRadiologyCard()}
+
+                {/* If user clicked View Both Stacked, show Lab below */}
+                {diagnosticTab === 'all' && renderLabCard()}
+              </div>
+            )}
+
+            {/* VIEW 3: LAB APPOINTMENTS */}
+            {activeMenu === 'lab' && (
+              <div className="diagnostics-view-container">
+                {/* Header and Filter Sub-tabs */}
+                <div className="appointments-header-row mb-4">
+                  <div>
+                    <h1 className="appointments-page-title">Lab Appointments</h1>
+                    <p className="text-muted small mb-0">
+                      View, manage and take action on your lab test appointments.
+                    </p>
+                  </div>
+                 
+                </div>
+
+                {/* Primary Card: Lab Card (Mint Green Banner) */}
+                {renderLabCard()}
+
+                {/* If user clicked View Both Stacked, show Radiology below */}
+                {diagnosticTab === 'all' && renderRadiologyCard()}
+              </div>
+            )}
+
+            {/* VIEW 4: BOTH LAB & RADIOLOGY STACKED (Matching Mockup Screenshot 100%) */}
+            {activeMenu === 'diagnostics' && (
+              <div className="diagnostics-view-container">
+                {/* Header and Sub-tabs */}
+                <div className="appointments-header-row mb-4">
+                  <div>
+                    <h1 className="appointments-page-title">Diagnostic Appointments (Lab &amp; Radiology)</h1>
+                    <p className="text-muted small mb-0">
+                      Complete overview of all laboratory pathology and radiology imaging investigations.
+                    </p>
+                  </div>
+                  <div className="d-flex align-items-center gap-3 flex-wrap">
+                    <div className="appointment-subtabs">
+                      <button
+                        className="subtab-btn active"
+                        type="button"
+                      >
+                        <i className="fas fa-layer-group"></i> View Both Stacked ({labAppointments.length + radiologyAppointments.length})
+                      </button>
+                      <button
+                        className="subtab-btn"
+                        onClick={() => {
+                          setActiveMenu('radiology');
+                          setDiagnosticTab('radiology');
+                        }}
+                        type="button"
+                      >
+                        <i className="fas fa-x-ray"></i> Radiology Only ({radiologyAppointments.length})
+                      </button>
+                      <button
+                        className="subtab-btn"
+                        onClick={() => {
+                          setActiveMenu('lab');
+                          setDiagnosticTab('lab');
+                        }}
+                        type="button"
+                      >
+                        <i className="fas fa-flask"></i> Lab Only ({labAppointments.length})
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn-book-radiology"
+                      onClick={() => handleOpenBookModal('radiology')}
+                    >
+                      <i className="fas fa-x-ray"></i> Book Radiology Test
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-book-lab"
+                      onClick={() => handleOpenBookModal('lab')}
+                    >
+                      <i className="fas fa-flask"></i> Book Lab Test
+                    </button>
                   </div>
                 </div>
-              )}
 
-              {/* VIEW 3: RADIOLOGY APPOINTMENTS */}
-              {activeMenu === 'radiology' && (
-                <div className="appointments-section-card">
-                  <div className="section-card-header">
-                    <div className="section-header-info">
-                      <div className="section-icon-badge" style={{ background: '#FAF5FF', color: '#9333EA' }}>
-                        <i className="fas fa-x-ray"></i>
-                      </div>
-                      <div>
-                        <h3 className="section-title">Radiology &amp; Imaging Appointments ({radiologyAppointments.length})</h3>
-                        <p className="section-subtitle">Manage appointments for X-Ray, MRI, Ultrasound, and CT Scans.</p>
-                      </div>
-                    </div>
-                  </div>
+                {/* Lab Card on top */}
+                {renderLabCard()}
 
-                  <div className="ari-table-responsive">
-                    <table className="ari-appointments-table">
-                      <thead>
-                        <tr>
-                          <th>Scan / Procedure</th>
-                          <th>Date &amp; Time</th>
-                          <th>Location / Room</th>
-                          <th>Preparation Note</th>
-                          <th>Status</th>
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {radiologyAppointments.map((rad) => (
-                          <tr key={rad.id}>
-                            <td>
-                              <div className="fw-bold text-dark">{rad.scanType}</div>
-                              <small className="text-muted">High Precision Digital Imaging</small>
-                            </td>
-                            <td>
-                              <div className="table-date-cell">
-                                <span className="table-date-main">{rad.date}</span>
-                                <span className="table-date-sub">{rad.dayTime}</span>
-                              </div>
-                            </td>
-                            <td>
-                              <div className="fw-medium">{rad.center}</div>
-                              <small className="text-muted">{rad.room}</small>
-                            </td>
-                            <td>
-                              <span className="badge bg-light text-dark border p-2">
-                                <i className="fas fa-info-circle text-primary me-1"></i> {rad.preparation}
-                              </span>
-                            </td>
-                            <td>
-                              <span className={`status-pill ${rad.status === 'Completed' ? 'status-pill-completed' : 'status-pill-confirmed'}`}>
-                                {rad.status}
-                              </span>
-                            </td>
-                            <td>
-                              <button
-                                type="button"
-                                className="btn-action-outline"
-                                onClick={() => showToast(`Preparation instructions sent to your registered mobile number.`)}
-                              >
-                                <i className="fas fa-file-medical"></i> View Instructions
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
+                {/* Radiology Card below (Exact mockup layout) */}
+                {renderRadiologyCard()}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -813,12 +1359,16 @@ export default function MyAppointments() {
               <div className="card mb-4 bg-light border-0">
                 <div className="card-body">
                   <div className="d-flex justify-content-between mb-2">
-                    <span className="text-muted">Doctor:</span>
-                    <strong>{selectedAppointment.doctor}</strong>
+                    <span className="text-muted">{selectedAppointment.doctor ? 'Doctor:' : 'Test / Procedure:'}</span>
+                    <strong>{selectedAppointment.doctor || selectedAppointment.testName}</strong>
                   </div>
                   <div className="d-flex justify-content-between mb-2">
-                    <span className="text-muted">Specialty:</span>
-                    <span>{selectedAppointment.specialty}</span>
+                    <span className="text-muted">{selectedAppointment.specialty ? 'Specialty:' : 'Department:'}</span>
+                    <span>{selectedAppointment.specialty || selectedAppointment.department}</span>
+                  </div>
+                  <div className="d-flex justify-content-between mb-2">
+                    <span className="text-muted">Hospital / Facility:</span>
+                    <span>{selectedAppointment.hospital} ({selectedAppointment.location || selectedAppointment.room})</span>
                   </div>
                   <div className="d-flex justify-content-between mb-2">
                     <span className="text-muted">Appointment Slot:</span>
@@ -826,8 +1376,8 @@ export default function MyAppointments() {
                   </div>
                   <hr />
                   <div className="d-flex justify-content-between mb-2">
-                    <span>Consultation Fee:</span>
-                    <span>₹{selectedAppointment.amount}</span>
+                    <span>{selectedAppointment.doctor ? 'Consultation Fee:' : 'Diagnostic Fee:'}</span>
+                    <span>₹{selectedAppointment.amount.toLocaleString()}</span>
                   </div>
                   <div className="d-flex justify-content-between mb-2">
                     <span>Hospital Convenience Fee:</span>
@@ -835,7 +1385,7 @@ export default function MyAppointments() {
                   </div>
                   <div className="d-flex justify-content-between fs-5 fw-bold text-dark pt-2 border-top">
                     <span>Total Amount:</span>
-                    <span className="text-primary">₹{selectedAppointment.amount}</span>
+                    <span className="text-primary">₹{selectedAppointment.amount.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -890,7 +1440,7 @@ export default function MyAppointments() {
                 Cancel
               </button>
               <button className="btn btn-primary px-4 fw-bold" onClick={handleProcessPayment}>
-                <i className="fas fa-lock me-2"></i> Pay ₹{selectedAppointment.amount}
+                <i className="fas fa-lock me-2"></i> Pay ₹{selectedAppointment.amount.toLocaleString()}
               </button>
             </div>
           </div>
@@ -909,8 +1459,10 @@ export default function MyAppointments() {
             </div>
             <div className="modal-body-custom">
               <div className="p-3 bg-light rounded-3 mb-4">
-                <div className="fw-bold text-dark">{selectedAppointment.doctor}</div>
-                <div className="text-muted small">{selectedAppointment.specialty} • {selectedAppointment.hospital}</div>
+                <div className="fw-bold text-dark">{selectedAppointment.doctor || selectedAppointment.testName}</div>
+                <div className="text-muted small">
+                  {selectedAppointment.specialty || selectedAppointment.department} • {selectedAppointment.hospital}
+                </div>
                 <div className="mt-2 small text-primary">
                   Current slot: <strong>{selectedAppointment.date}, {selectedAppointment.dayTime}</strong>
                 </div>
@@ -923,14 +1475,14 @@ export default function MyAppointments() {
                   className="form-control"
                   value={rescheduleDate}
                   onChange={(e) => setRescheduleDate(e.target.value)}
-                  min="2026-09-21"
+                  min="2026-09-01"
                 />
               </div>
 
               <div className="mb-3">
                 <label className="form-label fw-bold">Select Available Time Slot</label>
                 <div className="row g-2">
-                  {['09:30 AM', '10:15 AM', '11:00 AM', '02:30 PM', '04:00 PM', '05:30 PM'].map((slot) => (
+                  {['08:30 AM', '09:00 AM', '10:15 AM', '11:00 AM', '02:30 PM', '04:00 PM'].map((slot) => (
                     <div className="col-4" key={slot}>
                       <button
                         type="button"
@@ -970,7 +1522,7 @@ export default function MyAppointments() {
             </div>
             <div className="modal-body-custom">
               <p>
-                Are you sure you want to cancel your consultation with <strong>{selectedAppointment.doctor}</strong> scheduled for <strong>{selectedAppointment.date} ({selectedAppointment.dayTime})</strong>?
+                Are you sure you want to cancel your appointment for <strong>{selectedAppointment.doctor || selectedAppointment.testName}</strong> scheduled for <strong>{selectedAppointment.date} ({selectedAppointment.dayTime})</strong>?
               </p>
 
               <div className="mb-3">
@@ -981,7 +1533,7 @@ export default function MyAppointments() {
                   onChange={(e) => setCancelReason(e.target.value)}
                 >
                   <option value="Change of schedule">Change of schedule / Conflict</option>
-                  <option value="Doctor unavailable">Need a different doctor</option>
+                  <option value="Doctor unavailable">Need a different doctor / facility</option>
                   <option value="Recovered">Feeling better / Recovered</option>
                   <option value="Booked by mistake">Booked by mistake</option>
                   <option value="Other">Other reason</option>
@@ -990,7 +1542,7 @@ export default function MyAppointments() {
 
               {selectedAppointment.paymentStatus === 'Paid' && (
                 <div className="alert alert-info small mb-0">
-                  <i className="fas fa-info-circle me-1"></i> Since this appointment was already paid, a full refund of <strong>₹{selectedAppointment.amount}</strong> will be initiated back to your original payment method within 2-3 business days.
+                  <i className="fas fa-info-circle me-1"></i> Since this appointment was already paid, a full refund of <strong>₹{selectedAppointment.amount.toLocaleString()}</strong> will be initiated back to your original payment method within 2-3 business days.
                 </div>
               )}
             </div>
@@ -1030,7 +1582,7 @@ export default function MyAppointments() {
                   <div className="text-end">
                     <span className="badge bg-success mb-2 px-3 py-2">PAID IN FULL</span>
                     <div className="invoice-meta-item">
-                      Invoice: <strong>#INV-2026-{selectedAppointment.id}</strong>
+                      Invoice: <strong>#INV-{selectedAppointment.type ? selectedAppointment.type.toUpperCase() : 'OPD'}-2026-{selectedAppointment.id}</strong>
                     </div>
                     <div className="invoice-meta-item">Date: {selectedAppointment.date}</div>
                   </div>
@@ -1044,10 +1596,10 @@ export default function MyAppointments() {
                     <div className="small text-muted">Patient ID: ARI-PT-8842</div>
                   </div>
                   <div className="col-6 text-end">
-                    <div className="text-muted small">Consulting Specialist:</div>
-                    <strong>{selectedAppointment.doctor}</strong>
-                    <div className="small text-muted">{selectedAppointment.specialty}</div>
-                    <div className="small text-muted">{selectedAppointment.room}</div>
+                    <div className="text-muted small">{selectedAppointment.doctor ? 'Consulting Specialist:' : 'Service / Facility:'}</div>
+                    <strong>{selectedAppointment.doctor || selectedAppointment.testName}</strong>
+                    <div className="small text-muted">{selectedAppointment.specialty || selectedAppointment.department}</div>
+                    <div className="small text-muted">{selectedAppointment.hospital} • {selectedAppointment.location || selectedAppointment.room}</div>
                   </div>
                 </div>
 
@@ -1062,11 +1614,13 @@ export default function MyAppointments() {
                   <tbody>
                     <tr>
                       <td>
-                        <strong>Outpatient Consultation (OPD)</strong>
-                        <div className="text-muted small">Specialist OPD visit fee</div>
+                        <strong>{selectedAppointment.doctor ? 'Outpatient Consultation (OPD)' : selectedAppointment.testName}</strong>
+                        <div className="text-muted small">
+                          {selectedAppointment.doctor ? 'Specialist OPD visit fee' : `${selectedAppointment.department} Diagnostic Investigation`}
+                        </div>
                       </td>
                       <td>1</td>
-                      <td className="text-end">₹{selectedAppointment.amount}.00</td>
+                      <td className="text-end">₹{selectedAppointment.amount.toLocaleString()}.00</td>
                     </tr>
                     <tr>
                       <td>Electronic Health Record &amp; Vitals Capture</td>
@@ -1078,7 +1632,7 @@ export default function MyAppointments() {
 
                 <div className="invoice-total-row">
                   <span>Total Amount Paid:</span>
-                  <span>₹{selectedAppointment.amount}.00</span>
+                  <span>₹{selectedAppointment.amount.toLocaleString()}.00</span>
                 </div>
               </div>
             </div>
@@ -1100,7 +1654,175 @@ export default function MyAppointments() {
         </div>
       )}
 
-      {/* MODAL 5: DETAILS */}
+      {/* MODAL 5: DIAGNOSTIC REPORT MODAL */}
+      {modalType === 'report' && selectedAppointment && (
+        <div className="modal-backdrop-custom" onClick={() => setModalType(null)}>
+          <div className="modal-dialog-custom" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-custom">
+              <div className="d-flex align-items-center gap-2">
+                <i className="fas fa-file-medical text-primary fs-5"></i>
+                <h5 className="mb-0">Diagnostic Medical Report</h5>
+              </div>
+              <button className="modal-close-btn" onClick={() => setModalType(null)}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="modal-body-custom">
+              <div className="report-sheet">
+                <div className="report-header">
+                  <div>
+                    <div className="invoice-brand-title">
+                      <i className="fas fa-plus-square me-2"></i>ARI-HEALTH DIAGNOSTICS
+                    </div>
+                    <div className="invoice-meta-item">{selectedAppointment.hospital}</div>
+                    <div className="invoice-meta-item">NABL Accredited Medical Testing Laboratory</div>
+                  </div>
+                  <div className="text-end">
+                    <span className="badge bg-success mb-2 px-3 py-2">VERIFIED &amp; FINAL</span>
+                    <div className="invoice-meta-item">Report ID: <strong>#REP-2026-{selectedAppointment.id}</strong></div>
+                    <div className="invoice-meta-item">Report Date: {selectedAppointment.date}</div>
+                  </div>
+                </div>
+
+                <div className="row mb-3 bg-light p-3 rounded-3">
+                  <div className="col-6">
+                    <div className="text-muted small">Patient Name:</div>
+                    <strong>Nitin Dinkar</strong> (34 Yrs / Male)
+                    <div className="small text-muted">UHID: ARI-PT-8842</div>
+                  </div>
+                  <div className="col-6 text-end">
+                    <div className="text-muted small">Referred By:</div>
+                    <strong>Dr. Priya Sharma (MD)</strong>
+                    <div className="small text-muted">{selectedAppointment.department}</div>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <h6 className="fw-bold text-dark border-bottom pb-2">
+                    <i className="fas fa-microscope text-primary me-2"></i>
+                    Investigation: {selectedAppointment.testName}
+                  </h6>
+                </div>
+
+                <table className="report-table">
+                  <thead>
+                    <tr>
+                      <th>Test Parameter</th>
+                      <th>Observed Value</th>
+                      <th>Reference Interval</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedAppointment.testName.includes('Blood') || selectedAppointment.testName.includes('CBC') ? (
+                      <>
+                        <tr>
+                          <td>Hemoglobin (Hb)</td>
+                          <td><strong>14.6 g/dL</strong></td>
+                          <td>13.0 - 17.0 g/dL</td>
+                          <td><span className="badge bg-success">Normal</span></td>
+                        </tr>
+                        <tr>
+                          <td>Total Leukocyte Count (TLC)</td>
+                          <td><strong>7,200 /cumm</strong></td>
+                          <td>4,000 - 11,000</td>
+                          <td><span className="badge bg-success">Normal</span></td>
+                        </tr>
+                        <tr>
+                          <td>Platelet Count</td>
+                          <td><strong>245,000 /cumm</strong></td>
+                          <td>150,000 - 450,000</td>
+                          <td><span className="badge bg-success">Normal</span></td>
+                        </tr>
+                      </>
+                    ) : selectedAppointment.testName.includes('Lipid') ? (
+                      <>
+                        <tr>
+                          <td>Total Cholesterol</td>
+                          <td><strong>182 mg/dL</strong></td>
+                          <td>&lt; 200 mg/dL</td>
+                          <td><span className="badge bg-success">Desirable</span></td>
+                        </tr>
+                        <tr>
+                          <td>Triglycerides</td>
+                          <td><strong>138 mg/dL</strong></td>
+                          <td>&lt; 150 mg/dL</td>
+                          <td><span className="badge bg-success">Normal</span></td>
+                        </tr>
+                        <tr>
+                          <td>HDL Cholesterol (Good)</td>
+                          <td><strong>48 mg/dL</strong></td>
+                          <td>&gt; 40 mg/dL</td>
+                          <td><span className="badge bg-success">Optimal</span></td>
+                        </tr>
+                      </>
+                    ) : selectedAppointment.testName.includes('Thyroid') ? (
+                      <>
+                        <tr>
+                          <td>Total T3 (Triiodothyronine)</td>
+                          <td><strong>1.15 ng/mL</strong></td>
+                          <td>0.80 - 2.00 ng/mL</td>
+                          <td><span className="badge bg-success">Normal</span></td>
+                        </tr>
+                        <tr>
+                          <td>Total T4 (Thyroxine)</td>
+                          <td><strong>7.8 μg/dL</strong></td>
+                          <td>5.1 - 14.1 μg/dL</td>
+                          <td><span className="badge bg-success">Normal</span></td>
+                        </tr>
+                        <tr>
+                          <td>TSH (Ultrasensitive)</td>
+                          <td><strong>2.45 μIU/mL</strong></td>
+                          <td>0.27 - 4.20 μIU/mL</td>
+                          <td><span className="badge bg-success">Euthyroid</span></td>
+                        </tr>
+                      </>
+                    ) : (
+                      <>
+                        <tr>
+                          <td>Organ / Region Examined</td>
+                          <td><strong>{selectedAppointment.testName}</strong></td>
+                          <td>Standard Protocol</td>
+                          <td><span className="badge bg-success">Complete</span></td>
+                        </tr>
+                        <tr>
+                          <td>Radiological Impression</td>
+                          <td><strong>Normal anatomical structure with no acute abnormalities noted</strong></td>
+                          <td>Normal Study</td>
+                          <td><span className="badge bg-success">Normal</span></td>
+                        </tr>
+                      </>
+                    )}
+                  </tbody>
+                </table>
+
+                <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top text-muted small">
+                  <div>
+                    <i className="fas fa-check-double text-success me-1"></i> Digitally Signed by Chief Medical Specialist
+                  </div>
+                  <div>ARI Health Systems</div>
+                </div>
+              </div>
+            </div>
+            <div className="modal-footer-custom">
+              <button className="btn btn-light" onClick={() => setModalType(null)}>
+                Close
+              </button>
+              <button
+                className="btn btn-primary px-4 fw-bold"
+                onClick={() => {
+                  window.print();
+                  showToast('Diagnostic Report downloaded / sent to print.');
+                }}
+              >
+                <i className="fas fa-download me-2"></i> Download PDF Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 6: DETAILS */}
       {modalType === 'details' && selectedAppointment && (
         <div className="modal-backdrop-custom" onClick={() => setModalType(null)}>
           <div className="modal-dialog-custom" onClick={(e) => e.stopPropagation()}>
@@ -1113,12 +1835,12 @@ export default function MyAppointments() {
             <div className="modal-body-custom">
               <div className="p-3 bg-light rounded-3 mb-4">
                 <div className="d-flex justify-content-between align-items-center">
-                  <span className="fw-bold text-dark fs-5">{selectedAppointment.doctor}</span>
-                  <span className={`status-pill ${selectedAppointment.status === 'completed' ? 'status-pill-completed' : 'status-pill-cancelled'}`}>
+                  <span className="fw-bold text-dark fs-5">{selectedAppointment.doctor || selectedAppointment.testName}</span>
+                  <span className={`status-pill ${selectedAppointment.status === 'completed' || selectedAppointment.status === 'Completed' ? 'status-pill-completed' : 'status-pill-cancelled'}`}>
                     {selectedAppointment.status}
                   </span>
                 </div>
-                <div className="text-primary fw-medium">{selectedAppointment.specialty}</div>
+                <div className="text-primary fw-medium">{selectedAppointment.specialty || selectedAppointment.department}</div>
               </div>
 
               <div className="row g-3 mb-4">
@@ -1128,29 +1850,262 @@ export default function MyAppointments() {
                   <div className="small text-muted">{selectedAppointment.dayTime}</div>
                 </div>
                 <div className="col-6">
-                  <div className="text-muted small">Hospital &amp; Room</div>
+                  <div className="text-muted small">Hospital &amp; Location</div>
                   <div className="fw-bold">{selectedAppointment.hospital}</div>
-                  <div className="small text-muted">{selectedAppointment.room}</div>
+                  <div className="small text-muted">{selectedAppointment.location || selectedAppointment.room}</div>
                 </div>
+                {selectedAppointment.tokenNo && (
+                  <div className="col-6">
+                    <div className="text-muted small">Token Number</div>
+                    <div className="fw-bold">{selectedAppointment.tokenNo}</div>
+                  </div>
+                )}
                 <div className="col-6">
-                  <div className="text-muted small">Token Number</div>
-                  <div className="fw-bold">{selectedAppointment.tokenNo || '-'}</div>
-                </div>
-                <div className="col-6">
-                  <div className="text-muted small">Amount Paid</div>
-                  <div className="fw-bold">₹{selectedAppointment.amount}</div>
+                  <div className="text-muted small">Amount</div>
+                  <div className="fw-bold">₹{selectedAppointment.amount.toLocaleString()}</div>
                 </div>
               </div>
 
-              {selectedAppointment.status === 'cancelled' && (
+              {selectedAppointment.status === 'Cancelled' && (
                 <div className="alert alert-warning small mb-0">
-                  <i className="fas fa-info-circle me-1"></i> This consultation was cancelled. If you still need medical attention, please book a new slot or contact hospital support.
+                  <i className="fas fa-info-circle me-1"></i> This appointment was cancelled. If you still need medical attention, please book a new test or contact hospital support.
                 </div>
               )}
             </div>
             <div className="modal-footer-custom">
               <button className="btn btn-primary px-4" onClick={() => setModalType(null)}>
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 7: BOOK RADIOLOGY TEST (Interactive Modal) */}
+      {modalType === 'book-radiology' && (
+        <div className="modal-backdrop-custom" onClick={() => setModalType(null)}>
+          <div className="modal-dialog-custom" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-custom" style={{ background: '#F3E8FF', borderBottom: '1px solid #DDD6FE' }}>
+              <div className="d-flex align-items-center gap-2">
+                <div className="banner-icon-radiology" style={{ width: '38px', height: '38px', fontSize: '1.1rem' }}>
+                  <i className="fas fa-x-ray"></i>
+                </div>
+                <div>
+                  <h5 className="mb-0 text-dark fw-bold">Book Radiology Test</h5>
+                  <small className="text-muted">Diagnostic Scans, X-Rays, Ultrasound &amp; MRIs</small>
+                </div>
+              </div>
+              <button className="modal-close-btn" onClick={() => setModalType(null)}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="modal-body-custom">
+              <div className="mb-3">
+                <label className="form-label fw-bold">Select Procedure / Test</label>
+                <select
+                  className="form-select"
+                  value={newBookingTest}
+                  onChange={(e) => setNewBookingTest(e.target.value)}
+                >
+                  <option value="X-Ray Chest (PA View)">X-Ray Chest (PA View) — ₹600 (Radiology Dept)</option>
+                  <option value="Ultrasound Abdomen">Ultrasound Abdomen — ₹1,200 (USG Department)</option>
+                  <option value="MRI Brain">MRI Brain (with Contrast) — ₹4,500 (Advanced Imaging)</option>
+                  <option value="CT Scan Thorax">CT Scan Thorax — ₹2,800 (Computed Tomography)</option>
+                  <option value="Spine MRI (Lumbar)">Spine MRI (Lumbar) — ₹4,200 (Advanced Imaging)</option>
+                  <option value="Digital Mammography">Digital Mammography — ₹1,800 (Women's Imaging)</option>
+                </select>
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label fw-bold">Select Hospital / Diagnostic Facility</label>
+                <select
+                  className="form-select"
+                  value={newBookingHospital}
+                  onChange={(e) => setNewBookingHospital(e.target.value)}
+                >
+                  <option value="ARI Hospital, Delhi">ARI Hospital, Delhi (Radiology - Ground Floor)</option>
+                  <option value="ARI Diagnostic Center, Delhi">ARI Diagnostic Center, Delhi (Ultrasound Suite 2)</option>
+                  <option value="City Scan Center, Delhi">City Scan Center, Delhi (Advanced MRI/CT Wing)</option>
+                  <option value="Apollo Hospital, Delhi">Apollo Hospital, Delhi (Diagnostic Block)</option>
+                </select>
+              </div>
+
+              <div className="row g-3 mb-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-bold">Appointment Date</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={newBookingDate}
+                    onChange={(e) => setNewBookingDate(e.target.value)}
+                    min="2026-09-01"
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-bold">Preferred Time Slot</label>
+                  <select
+                    className="form-select"
+                    value={newBookingTime}
+                    onChange={(e) => setNewBookingTime(e.target.value)}
+                  >
+                    <option value="Tue, 02:00 PM">02:00 PM (Afternoon)</option>
+                    <option value="Wed, 11:00 AM">11:00 AM (Morning)</option>
+                    <option value="Mon, 10:00 AM">10:00 AM (Morning)</option>
+                    <option value="09:00 AM">09:00 AM (Early Slot)</option>
+                    <option value="03:30 PM">03:30 PM (Evening)</option>
+                    <option value="05:00 PM">05:00 PM (Evening)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="p-3 bg-light rounded-3 mb-3 border">
+                <div className="d-flex justify-content-between mb-1 small">
+                  <span className="text-muted">Selected Scan:</span>
+                  <strong className="text-dark">{newBookingTest}</strong>
+                </div>
+                <div className="d-flex justify-content-between mb-1 small">
+                  <span className="text-muted">Facility:</span>
+                  <span>{newBookingHospital}</span>
+                </div>
+                <div className="d-flex justify-content-between mb-1 small">
+                  <span className="text-muted">Radiologist Consultation:</span>
+                  <span className="text-success fw-semibold">Included (Report included)</span>
+                </div>
+                <div className="d-flex justify-content-between pt-2 border-top fw-bold text-dark">
+                  <span>Estimated Total:</span>
+                  <span className="text-primary fs-6">
+                    ₹{(newBookingTest.includes('MRI') ? 4500 : newBookingTest.includes('CT') ? 2800 : newBookingTest.includes('Ultrasound') ? 1200 : newBookingTest.includes('Mammography') ? 1800 : 600).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+             
+            </div>
+            <div className="modal-footer-custom">
+              <button className="btn btn-light" onClick={() => setModalType(null)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-book-radiology"
+                onClick={() => handleConfirmBookTest('radiology')}
+              >
+                <i className="fas fa-check-circle"></i> Confirm &amp; Book Radiology Test
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 8: BOOK LAB TEST (Interactive Modal) */}
+      {modalType === 'book-lab' && (
+        <div className="modal-backdrop-custom" onClick={() => setModalType(null)}>
+          <div className="modal-dialog-custom" style={{ maxWidth: '600px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-custom" style={{ background: '#E8F8F0', borderBottom: '1px solid #D1FAE5' }}>
+              <div className="d-flex align-items-center gap-2">
+                <div className="banner-icon-lab" style={{ width: '38px', height: '38px', fontSize: '1.1rem' }}>
+                  <i className="fas fa-flask"></i>
+                </div>
+                <div>
+                  <h5 className="mb-0 text-dark fw-bold">Book Lab Test</h5>
+                  <small className="text-muted">Pathology, Blood Tests, &amp; Health Profiles</small>
+                </div>
+              </div>
+              <button className="modal-close-btn" onClick={() => setModalType(null)}>
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+            <div className="modal-body-custom">
+              <div className="mb-3">
+                <label className="form-label fw-bold">Select Test / Health Package</label>
+                <select
+                  className="form-select"
+                  value={newBookingTest}
+                  onChange={(e) => setNewBookingTest(e.target.value)}
+                >
+                  <option value="Complete Blood Count (CBC)">Complete Blood Count (CBC) — ₹350 (Pathology Lab)</option>
+                  <option value="Thyroid Profile (T3, T4, TSH)">Thyroid Profile (T3, T4, TSH) — ₹500 (Endocrinology Lab)</option>
+                  <option value="Health Checkup Package">Health Checkup Package (Full Body) — ₹1,499</option>
+                  <option value="Lipid Profile">Lipid Profile (Heart Health) — ₹750 (Biochemistry)</option>
+                  <option value="HbA1c Diabetes Screen">HbA1c Diabetes Screen — ₹450 (Pathology Lab)</option>
+                  <option value="Liver Function Test (LFT)">Liver Function Test (LFT) — ₹650 (Biochemistry)</option>
+                </select>
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label fw-bold">Select Hospital / Diagnostic Lab</label>
+                <select
+                  className="form-select"
+                  value={newBookingHospital}
+                  onChange={(e) => setNewBookingHospital(e.target.value)}
+                >
+                  <option value="ARI Hospital, Delhi">ARI Hospital, Delhi (Lab - 1st Floor)</option>
+                  <option value="ARI Diagnostic Center, Delhi">ARI Diagnostic Center, Delhi (Pathology Wing)</option>
+                  <option value="City Labs, Delhi">City Labs, Delhi (Central Diagnostic Unit)</option>
+                  <option value="Apollo Hospital, Delhi">Apollo Hospital, Delhi (Clinical Lab)</option>
+                </select>
+              </div>
+
+              <div className="row g-3 mb-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-bold">Appointment Date</label>
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={newBookingDate}
+                    onChange={(e) => setNewBookingDate(e.target.value)}
+                    min="2026-09-01"
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-bold">Preferred Time Slot</label>
+                  <select
+                    className="form-select"
+                    value={newBookingTime}
+                    onChange={(e) => setNewBookingTime(e.target.value)}
+                  >
+                    <option value="Fri, 08:00 AM">08:00 AM (Fasting Slot)</option>
+                    <option value="Fri, 09:00 AM">09:00 AM (Morning)</option>
+                    <option value="Fri, 08:30 AM">08:30 AM (Morning)</option>
+                    <option value="10:00 AM">10:00 AM (Morning)</option>
+                    <option value="11:30 AM">11:30 AM (Noon)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="p-3 bg-light rounded-3 mb-3 border">
+                <div className="d-flex justify-content-between mb-1 small">
+                  <span className="text-muted">Selected Test:</span>
+                  <strong className="text-dark">{newBookingTest}</strong>
+                </div>
+                <div className="d-flex justify-content-between mb-1 small">
+                  <span className="text-muted">Sample Collection:</span>
+                  <span className="text-success fw-semibold">Hospital Walk-In / Free Collection</span>
+                </div>
+                <div className="d-flex justify-content-between mb-1 small">
+                  <span className="text-muted">Digital Report Delivery:</span>
+                  <span>Within 24 hours online</span>
+                </div>
+                <div className="d-flex justify-content-between pt-2 border-top fw-bold text-dark">
+                  <span>Estimated Total:</span>
+                  <span className="text-success fs-6">
+                    ₹{(newBookingTest.includes('Health Checkup') ? 1499 : newBookingTest.includes('Lipid') ? 750 : newBookingTest.includes('Thyroid') ? 500 : newBookingTest.includes('Liver') ? 650 : newBookingTest.includes('HbA1c') ? 450 : 350).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+             
+            </div>
+            <div className="modal-footer-custom">
+              <button className="btn btn-light" onClick={() => setModalType(null)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-book-lab"
+                onClick={() => handleConfirmBookTest('lab')}
+              >
+                <i className="fas fa-check-circle"></i> Confirm &amp; Book Lab Test
               </button>
             </div>
           </div>

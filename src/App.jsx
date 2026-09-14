@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import MyAppointments from './pages/MyAppointments';
 import BookAppointment from './pages/BookAppointment';
+import HealthRecords from './pages/HealthRecords';
 
 export default function App() {
   return (
@@ -16,6 +17,8 @@ export default function App() {
         <Route path="/booking" element={<BookAppointment />} />
         <Route path="/appointments" element={<MyAppointments />} />
         <Route path="/my-appointments" element={<MyAppointments />} />
+        <Route path="/health-records" element={<HealthRecords />} />
+        <Route path="/records" element={<HealthRecords />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
