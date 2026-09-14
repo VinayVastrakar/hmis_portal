@@ -1,145 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
   const [isNavCollapsed, setIsNavCollapsed] = useState(true);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotificationMenu, setShowNotificationMenu] = useState(false);
-  const [showSwitchSubmenu, setShowSwitchSubmenu] = useState(false);
-
-  // Modal States
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showFamilyModal, setShowFamilyModal] = useState(false);
-  const [toastMessage, setToastMessage] = useState(null);
-
-  // Family Members / Patients Data
-  const [patients, setPatients] = useState([
-    {
-      id: 'pt-1',
-      name: 'John Doe',
-      alias: 'Nitin Dinkar',
-      relation: 'Self',
-      gender: 'Male',
-      age: 34,
-      dob: '14 May 1992',
-      phone: '+91 9876543210',
-      email: 'john.doe@example.com',
-      patientId: 'ARI-PT-8842',
-      bloodGroup: 'O+',
-      abhaId: '91-8842-4912-5812',
-      address: 'B-402, Green Avenue, Rohini, New Delhi'
-    },
-    {
-      id: 'pt-2',
-      name: 'Priya Doe',
-      relation: 'Spouse',
-      gender: 'Female',
-      age: 31,
-      dob: '22 Aug 1995',
-      phone: '+91 9876543211',
-      email: 'priya.doe@example.com',
-      patientId: 'ARI-PT-8843',
-      bloodGroup: 'A+',
-      abhaId: '91-8843-1249-3401',
-      address: 'B-402, Green Avenue, Rohini, New Delhi'
-    },
-    {
-      id: 'pt-3',
-      name: 'Aarav Doe',
-      relation: 'Son',
-      gender: 'Male',
-      age: 6,
-      dob: '10 Jan 2020',
-      phone: '+91 9876543210',
-      email: 'john.doe@example.com',
-      patientId: 'ARI-PT-8844',
-      bloodGroup: 'O+',
-      abhaId: '91-8844-9021-1184',
-      address: 'B-402, Green Avenue, Rohini, New Delhi'
-    },
-    {
-      id: 'pt-4',
-      name: 'Kamla Doe',
-      relation: 'Mother',
-      gender: 'Female',
-      age: 62,
-      dob: '05 Mar 1964',
-      phone: '+91 9876543212',
-      email: 'kamla.doe@example.com',
-      patientId: 'ARI-PT-8845',
-      bloodGroup: 'B+',
-      abhaId: '91-8845-7731-9042',
-      address: 'B-402, Green Avenue, Rohini, New Delhi'
-    }
-  ]);
-
-  const [activePatientId, setActivePatientId] = useState('pt-1');
-
-  // Form State for Adding Family Member
-  const [newMemberName, setNewMemberName] = useState('');
-  const [newMemberRelation, setNewMemberRelation] = useState('Spouse');
-  const [newMemberDob, setNewMemberDob] = useState('');
-  const [newMemberGender, setNewMemberGender] = useState('Female');
-
+  const [patientData, setPatientData] = useState(null);
   const navigate = useNavigate();
 
-  const activePatient = patients.find(p => p.id === activePatientId) || patients[0];
-
-  const getInitials = (name) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  };
-
-  const showToast = (message) => {
-    setToastMessage(message);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3200);
-  };
-
-  const handleSelectPatient = (patient) => {
-    setActivePatientId(patient.id);
-    setShowProfileMenu(false);
-    setShowSwitchSubmenu(false);
-    showToast(`Switched active patient to ${patient.name} (${patient.relation})`);
-  };
-
-  const handleAddFamilyMember = (e) => {
-    e.preventDefault();
-    if (!newMemberName.trim()) return;
-
-    const newId = `pt-${Date.now()}`;
-    const newPatient = {
-      id: newId,
-      name: newMemberName.trim(),
-      relation: newMemberRelation,
-      gender: newMemberGender,
-      age: 28,
-      dob: newMemberDob || '01 Jan 1998',
-      phone: activePatient.phone,
-      email: activePatient.email,
-      patientId: `ARI-PT-${Math.floor(8850 + Math.random() * 500)}`,
-      bloodGroup: 'O+',
-      abhaId: `91-8846-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`,
-      address: activePatient.address
-    };
-
-    setPatients(prev => [...prev, newPatient]);
-    setNewMemberName('');
-    showToast(`Added ${newPatient.name} to family members!`);
-  };
+  useEffect(() => {
+    const data = localStorage.getItem('patientDetails');
+    if (data) {
+      try {
+        setPatientData(JSON.parse(data));
+      } catch (e) {
+        console.error("Failed to parse patient data", e);
+      }
+    }
+  }, []);
 
   const handleNavCollapse = () => setIsNavCollapsed(!isNavCollapsed);
 
   const handleLogout = (e) => {
     e.preventDefault();
     if (window.confirm('Are you sure you want to logout?')) {
+      localStorage.clear();
       navigate('/login');
     }
+  };
+
+  const handleAddFamilyMember = (e) => {
+    e.preventDefault();
+    // To be implemented later
+    alert('Add Family Member functionality coming soon!');
+    setShowProfileMenu(false);
+  };
+
+  const handleSelectPatient = (patientId) => {
+    // To be implemented later
+    console.log('Patient selected:', patientId);
+    alert('Switch Patient functionality coming soon!');
+    setShowProfileMenu(false);
+  };
+
+  const getUserInitials = () => {
+    if (!patientData || !patientData.patientName) return 'U';
+    const names = patientData.patientName.split(' ');
+    if (names.length === 1) return names[0].charAt(0).toUpperCase();
+    return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
   };
 
   return (
@@ -474,48 +382,57 @@ export default function Navbar() {
                   className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold fs-4"
                   style={{ width: '64px', height: '64px', background: 'var(--primary-gradient)' }}
                 >
-                  {getInitials(activePatient.name)}
+                  {getUserInitials()}
                 </div>
-                <div>
-                  <h5 className="fw-bold text-dark mb-1">{activePatient.name}</h5>
-                  <div className="d-flex align-items-center gap-2">
-                    <span className="badge bg-primary">{activePatient.relation}</span>
-                    <span className="text-muted small">Patient ID: <strong>{activePatient.patientId}</strong></span>
-                  </div>
+                <div className="d-none d-md-flex align-items-center gap-1">
+                  <span className="fw-semibold text-dark small">{patientData?.patientName || 'User'}</span>
+                  <i className="fas fa-chevron-down text-muted" style={{ fontSize: '0.7rem' }}></i>
                 </div>
               </div>
 
-              {/* Details Grid */}
-              <div className="row g-3">
-                <div className="col-6">
-                  <div className="text-muted small">Full Name</div>
-                  <div className="fw-bold text-dark">{activePatient.name}</div>
-                </div>
-                <div className="col-6">
-                  <div className="text-muted small">Relationship</div>
-                  <div className="fw-bold text-dark">{activePatient.relation}</div>
-                </div>
-                <div className="col-6">
-                  <div className="text-muted small">Gender &amp; Age</div>
-                  <div className="fw-bold text-dark">{activePatient.gender}, {activePatient.age} yrs</div>
-                </div>
-                <div className="col-6">
-                  <div className="text-muted small">Date of Birth</div>
-                  <div className="fw-bold text-dark">{activePatient.dob}</div>
-                </div>
-                <div className="col-6">
-                  <div className="text-muted small">Mobile Number</div>
-                  <div className="fw-bold text-dark">{activePatient.phone}</div>
-                </div>
-                <div className="col-6">
-                  <div className="text-muted small">Email Address</div>
-                  <div className="fw-bold text-dark">{activePatient.email}</div>
-                </div>
-                <div className="col-6">
-                  <div className="text-muted small">Blood Group</div>
-                  <div className="fw-bold text-danger">
-                    <i className="fas fa-tint me-1"></i> {activePatient.bloodGroup}
+              {/* Profile Dropdown */}
+              {showProfileMenu && (
+                <div 
+                  className="dropdown-menu dropdown-menu-end show position-absolute mt-2 shadow-lg border-0 rounded-3" 
+                  style={{ right: 0, top: '100%', minWidth: '220px', zIndex: 1050 }}
+                >
+                  <div className="px-3 py-2 border-bottom bg-light rounded-top">
+                    <strong className="text-dark d-block">{patientData?.patientName || 'User'}</strong>
+                    <div className="small text-muted">{patientData?.patientPhoneNumber ? `+91 ${patientData.patientPhoneNumber}` : 'No Phone'}</div>
+                    <div className="small text-primary mt-1">Patient ID: {patientData?.patientId || 'N/A'}</div>
                   </div>
+                  <NavLink className="dropdown-item py-2" to="/dashboard" onClick={() => setShowProfileMenu(false)}>
+                    <i className="fas fa-columns me-2 text-primary"></i> Dashboard
+                  </NavLink>
+                  <NavLink className="dropdown-item py-2" to="/appointments" onClick={() => setShowProfileMenu(false)}>
+                    <i className="fas fa-calendar-check me-2 text-primary"></i> My Appointments
+                  </NavLink>
+                  <a className="dropdown-item py-2" href="/dashboard#records" onClick={() => setShowProfileMenu(false)}>
+                    <i className="fas fa-file-medical me-2 text-primary"></i> Health Records
+                  </a>
+                  <div className="dropdown-divider"></div>
+                  
+                  {/* Family Member Options Placeholders */}
+                  <h6 className="dropdown-header text-muted">Family Members</h6>
+                  <button 
+                    className="dropdown-item py-2" 
+                    onClick={() => handleSelectPatient('placeholder-id')}
+                  >
+                    <i className="fas fa-user-friends me-2 text-primary"></i> Switch Patient
+                  </button>
+                  <button 
+                    className="dropdown-item py-2" 
+                    onClick={handleAddFamilyMember}
+                  >
+                    <i className="fas fa-plus-circle me-2 text-primary"></i> Add Family Member
+                  </button>
+                  <div className="dropdown-divider"></div>
+                  <button 
+                    className="dropdown-item text-danger py-2" 
+                    onClick={handleLogout}
+                  >
+                    <i className="fas fa-sign-out-alt me-2"></i> Logout
+                  </button>
                 </div>
                 <div className="col-6">
                   <div className="text-muted small">ABHA Health ID</div>
