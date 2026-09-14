@@ -1,10 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 export default function Dashboard() {
   const [filter, setFilter] = useState('all');
+  const [patientName, setPatientName] = useState('User');
+
+  useEffect(() => {
+    const data = localStorage.getItem('patientDetails');
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.patientName) setPatientName(parsed.patientName);
+      } catch (e) {
+        console.error("Failed to parse patient data", e);
+      }
+    }
+  }, []);
 
   const appointments = [
     {
@@ -45,7 +58,7 @@ export default function Dashboard() {
         <div className="container-custom">
           <div className="row align-items-center">
             <div className="col-lg-8">
-              <h1 className="mb-3">Welcome back, Nitin Dinkar!</h1>
+              <h1 className="mb-3">Welcome back, {patientName}!</h1>
               <p className="mb-0" style={{ opacity: 0.9 }}>
                 Here's your health dashboard and upcoming appointments
               </p>
