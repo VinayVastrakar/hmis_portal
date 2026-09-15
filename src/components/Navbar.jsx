@@ -20,22 +20,40 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const data = localStorage.getItem('patientDetails');
-    if (data) {
+    const activeData = localStorage.getItem('patientDetails');
+    const listData = localStorage.getItem('patientList');
+    
+    if (activeData) {
       try {
-        const parsed = JSON.parse(data);
-        setPatientData(parsed);
-        // Map local storage data to the expected activePatient format
-        setPatients([{
-          id: parsed.patientId || 1,
-          name: parsed.patientName || 'User',
-          relation: 'Self',
-          gender: 'N/A',
-          age: 'N/A',
-          dob: 'N/A',
-          patientId: parsed.patientId || 'N/A'
-        }]);
-        setActivePatientId(parsed.patientId || 1);
+        const parsedActive = JSON.parse(activeData);
+        setPatientData(parsedActive);
+        setActivePatientId(parsedActive.patientId || 1);
+        
+        if (listData) {
+          const parsedList = JSON.parse(listData);
+          const mappedPatients = parsedList.map(p => ({
+            id: p.patientId,
+            name: p.patientName,
+            relation: p.relation,
+            gender: p.gender || 'N/A',
+            age: p.age || 'N/A',
+            dob: 'N/A',
+            patientId: p.patientId,
+            originalData: p
+          }));
+          setPatients(mappedPatients);
+        } else {
+          setPatients([{
+            id: parsedActive.patientId || 1,
+            name: parsedActive.patientName || 'User',
+            relation: parsedActive.relation || 'Self',
+            gender: parsedActive.gender || 'N/A',
+            age: parsedActive.age || 'N/A',
+            dob: 'N/A',
+            patientId: parsedActive.patientId || 'N/A',
+            originalData: parsedActive
+          }]);
+        }
       } catch (e) {
         console.error("Failed to parse patient data", e);
       }
@@ -60,11 +78,22 @@ export default function Navbar() {
   };
 
   const handleSelectPatient = (patient) => {
-    // To be implemented later
-    console.log('Patient selected:', patient);
     setActivePatientId(patient.id);
+    
+    if (patient.originalData) {
+      setPatientData(patient.originalData);
+      localStorage.setItem('patientDetails', JSON.stringify(patient.originalData));
+      // Dispatch event in case components want to listen without reloading
+      window.dispatchEvent(new Event('patientSwitched'));
+    }
+    
     showToast(`Switched to ${patient.name}`);
     setShowProfileMenu(false);
+
+    // Reload the page to ensure all components fetch data for the new patient
+    setTimeout(() => {
+      window.location.reload();
+    }, 600);
   };
 
   const getInitials = (name) => {
@@ -84,9 +113,9 @@ export default function Navbar() {
   // Derive active patient from state
   const activePatient = patients.find(p => p.id === activePatientId) || {
     name: patientData?.patientName || 'User',
-    relation: 'Self',
-    gender: 'N/A',
-    age: 'N/A',
+    relation: patientData?.relation || 'Self',
+    gender: patientData?.gender || 'N/A',
+    age: patientData?.age || 'N/A',
     patientId: patientData?.patientId || 'N/A',
     abhaId: 'ABHA-XXXX-XXXX-XXXX',
     address: 'Not provided'

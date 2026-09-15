@@ -5,14 +5,14 @@ import Footer from '../components/Footer';
 
 export default function Dashboard() {
   const [filter, setFilter] = useState('all');
-  const [patientName, setPatientName] = useState('User');
+  const [activePatient, setActivePatient] = useState(null);
 
   useEffect(() => {
     const data = localStorage.getItem('patientDetails');
     if (data) {
       try {
         const parsed = JSON.parse(data);
-        if (parsed.patientName) setPatientName(parsed.patientName);
+        setActivePatient(parsed);
       } catch (e) {
         console.error("Failed to parse patient data", e);
       }
@@ -58,7 +58,7 @@ export default function Dashboard() {
         <div className="container-custom">
           <div className="row align-items-center">
             <div className="col-lg-8">
-              <h1 className="mb-3">Welcome back, {patientName}!</h1>
+              <h1 className="mb-3">Welcome back, {activePatient?.patientName || 'User'}!</h1>
               <p className="mb-0" style={{ opacity: 0.9 }}>
                 Here's your health dashboard and upcoming appointments
               </p>
