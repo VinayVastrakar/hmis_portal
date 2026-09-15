@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 export default function BookAppointment({ defaultView = 'listing' }) {
   const navigate = useNavigate();
@@ -176,10 +174,7 @@ export default function BookAppointment({ defaultView = 'listing' }) {
   };
 
   return (
-    <div className="bg-light min-vh-100 d-flex flex-column" style={{ backgroundColor: '#f8fafc' }}>
-      {/* Global Navbar */}
-      <Navbar />
-
+    <div className="bg-light flex-grow-1 d-flex flex-column" style={{ backgroundColor: '#f8fafc' }}>
       {/* VIEW 1: FIND A DOCTOR (LISTING WITH PREVIOUS LEFT FILTER CARD) */}
       {viewMode === 'listing' && (
         <div className="book-appointment-container flex-grow-1 py-4">
@@ -937,9 +932,6 @@ export default function BookAppointment({ defaultView = 'listing' }) {
           </div>
         </div>
       )}
-
-      {/* Global Footer */}
-      <Footer />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import BookAppointment from './pages/BookAppointment';
 import HealthRecords from './pages/HealthRecords';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
+import Layout from './components/Layout';
 
 export default function App() {
   return (
@@ -18,15 +19,17 @@ export default function App() {
           <Route path="/login" element={<Login />} />
         </Route>
 
-        {/* Protected Routes (Only accessible when logged in) */}
+        {/* Protected Routes (Only accessible when logged in, with shared Layout) */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/book-appointment" element={<BookAppointment />} />
-          <Route path="/book-opd-consultation" element={<BookAppointment />} />
-          <Route path="/booking" element={<BookAppointment />} />
-          <Route path="/appointments" element={<MyAppointments />} />
-          <Route path="/my-appointments" element={<MyAppointments />} />
-          <Route path="/health-records" element={<HealthRecords />} />
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/book-appointment" element={<BookAppointment />} />
+            <Route path="/book-opd-consultation" element={<BookAppointment />} />
+            <Route path="/booking" element={<BookAppointment />} />
+            <Route path="/appointments" element={<MyAppointments />} />
+            <Route path="/my-appointments" element={<MyAppointments />} />
+            <Route path="/health-records" element={<HealthRecords />} />
+          </Route>
         </Route>
 
         {/* Catch-all fallback */}
