@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import MyAppointments from './pages/MyAppointments';
 import BookAppointment from './pages/BookAppointment';
+import HealthRecords from './pages/HealthRecords';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 
@@ -21,9 +22,11 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/book-appointment" element={<BookAppointment />} />
+          <Route path="/book-opd-consultation" element={<BookAppointment />} />
           <Route path="/booking" element={<BookAppointment />} />
           <Route path="/appointments" element={<MyAppointments />} />
           <Route path="/my-appointments" element={<MyAppointments />} />
+          <Route path="/health-records" element={<HealthRecords />} />
         </Route>
 
         {/* Catch-all fallback */}

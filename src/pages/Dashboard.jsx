@@ -2,45 +2,88 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { apiService } from '../services/apiService';
+import { ENDPOINTS } from '../constants/apiEndpoints';
 
 export default function Dashboard() {
   const [filter, setFilter] = useState('all');
-  const [patientName, setPatientName] = useState('User');
+  const [activePatient, setActivePatient] = useState(null);
+
+  const [appointments, setAppointments] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const data = localStorage.getItem('patientDetails');
+    const hospitalData = localStorage.getItem('selectedHospital');
+    let parsedPatient = null;
+    let parsedHospital = null;
+    
     if (data) {
       try {
-        const parsed = JSON.parse(data);
-        if (parsed.patientName) setPatientName(parsed.patientName);
+        parsedPatient = JSON.parse(data);
+        setActivePatient(parsedPatient);
       } catch (e) {
         console.error("Failed to parse patient data", e);
       }
     }
-  }, []);
-
-  const appointments = [
-    {
-      id: 1,
-      when: 'Today',
-      time: '4:00 PM',
-      doctor: 'Dr. Sarah Johnson',
-      specialty: 'Cardiologist',
-      location: 'ARI Hospital, Delhi',
-      room: 'Consultation Room 12',
-      status: 'confirmed'
-    },
-    {
-      id: 2,
-      when: 'Tomorrow',
-      time: '11:00 AM',
-      doctor: 'Dr. Michael Chen',
-      specialty: 'Dermatologist',
-      location: 'Skin Care Clinic, Mumbai',
-      room: 'Room 5, 2nd Floor',
-      status: 'pending'
+    
+    if (hospitalData) {
+      try {
+        parsedHospital = JSON.parse(hospitalData);
+      } catch (e) {}
     }
-  ];
+
+    const fetchAppointments = async () => {
+      if (!parsedPatient || !parsedHospital) return;
+      
+      setIsLoading(true);
+      try {
+        const queryParams = new URLSearchParams({
+          hospitalId: parsedHospital.id,
+          patientId: parsedPatient.patientId,
+          deptTypeCode: 'OPD,LAB,RAD',
+          includeAllHistory: 'false'
+        }).toString();
+        
+        const response = await apiService.get(`${ENDPOINTS.APPOINTMENTS.HISTORY_LIST}?${queryParams}`);
+        
+        if (response.status === 200 && response.response) {
+          const mapped = response.response.map(app => {
+            let when = app.appointmentDate || 'N/A';
+            let time = app.appointmentStartTime || (app.appointmentDate && app.appointmentDate.includes(' ') ? app.appointmentDate.split(' ')[1] : 'N/A');
+            if (when && when.includes(' ')) {
+              when = when.split(' ')[0];
+            }
+            
+            let status = 'pending';
+            if (app.visitStatus === 'y') status = 'completed';
+            else if (app.visitStatus === 'c') status = 'cancelled';
+            else if (app.visitStatus === 'n') {
+              status = app.visitPaymentStatus === 'y' ? 'confirmed' : 'pending';
+            }
+            
+            return {
+              id: app.visitId,
+              when: when,
+              time: time,
+              doctor: app.doctorName || 'Not Assigned',
+              specialty: app.departmentName,
+              location: parsedHospital.hospitalName,
+              room: 'Room Not Assigned',
+              status: status
+            };
+          });
+          setAppointments(mapped);
+        }
+      } catch (error) {
+        console.error("Failed to fetch appointments:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
 
   const filteredAppointments = appointments.filter((app) => {
     if (filter === 'all') return true;
@@ -58,7 +101,7 @@ export default function Dashboard() {
         <div className="container-custom">
           <div className="row align-items-center">
             <div className="col-lg-8">
-              <h1 className="mb-3">Welcome back, {patientName}!</h1>
+              <h1 className="mb-3">Welcome back, {activePatient?.patientName || 'User'}!</h1>
               <p className="mb-0" style={{ opacity: 0.9 }}>
                 Here's your health dashboard and upcoming appointments
               </p>
@@ -150,7 +193,13 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="card-ari-body">
-                {filteredAppointments.length === 0 ? (
+                {isLoading ? (
+                  <div className="text-center py-5">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                ) : filteredAppointments.length === 0 ? (
                   <p className="text-muted text-center py-4 mb-0">No appointments found matching this filter.</p>
                 ) : (
                   filteredAppointments.map((app) => (
@@ -163,8 +212,8 @@ export default function Dashboard() {
                           </div>
                         </div>
                         <div className="col-md-3 mb-3 mb-md-0">
-                          <h6 className="mb-1 fw-bold">{app.doctor}</h6>
-                          <small className="doctor-specialty">{app.specialty}</small>
+                          <h6 className="mb-1 fw-bold">{app.doctor || app.specialty}</h6>
+                          <small className="doctor-specialty">{app.doctor ? app.specialty : 'Diagnostic'}</small>
                         </div>
                         <div className="col-md-3 mb-3 mb-md-0">
                           <p className="mb-1 fw-medium">{app.location}</p>

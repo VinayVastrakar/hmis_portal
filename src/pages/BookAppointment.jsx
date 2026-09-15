@@ -3,573 +3,937 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
-export default function BookAppointment() {
+export default function BookAppointment({ defaultView = 'listing' }) {
   const navigate = useNavigate();
 
-  // Filter States
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
-  const [consultationType, setConsultationType] = useState('in-person'); // 'in-person' or 'video'
-
-  // Modal States
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [isSlotModalOpen, setIsSlotModalOpen] = useState(false);
-  const [selectedDateIndex, setSelectedDateIndex] = useState(0);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState('10:30 AM');
-  const [patientNote, setPatientNote] = useState('');
-  const [bookingSuccessData, setBookingSuccessData] = useState(null);
+  // View mode: 'listing' (Find a Doctor + Doctors list) or 'details' (Book OPD Consultation page)
+  const [viewMode, setViewMode] = useState(defaultView);
 
   // Doctors Database
   const allDoctors = [
     {
+      id: 'doc-amit',
+      name: 'Dr. Amit Kumar Pandit',
+      specialty: 'ENT Specialist',
+      degrees: 'MBBS, MD (AIIMS)',
+      location: 'Noida',
+      rating: 4.7,
+      reviewsCount: 124,
+      fee: 1200,
+      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400&h=400',
+      gender: 'male',
+      experience: '10 Years Experience',
+      availableTypes: ['in-person', 'video'],
+      about: 'Dr. Amit Kumar Pandit is an experienced ENT specialist with expertise in treating a wide range of ear, nose and throat conditions. He is committed to providing compassionate care and evidence-based treatment to patients of all age groups.',
+      expertise: [
+        'Head & Neck Surgery',
+        'Sinus Disorders',
+        'Pediatric ENT',
+        'Hearing Disorders'
+      ],
+      education: [
+        'MBBS – AIIMS, New Delhi',
+        'MD (ENT) – AIIMS, New Delhi'
+      ],
+      memberships: [
+        'Association of Otolaryngologists of India (AOI)',
+        'Indian Medical Association (IMA)'
+      ],
+      languages: ['English', 'Hindi', 'Bengali']
+    },
+    {
       id: 'doc-1',
       name: 'Dr. Sarah Johnson',
       specialty: 'Cardiologist',
+      degrees: 'MBBS, MD (Cardiology)',
       location: 'ARI Hospital, Delhi',
       rating: 4.8,
       reviewsCount: 124,
       fee: 800,
-      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=256&h=256',
+      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'female',
-      experience: '12 years exp.',
-      availableTypes: ['in-person', 'video']
+      experience: '12 Years Experience',
+      availableTypes: ['in-person', 'video'],
+      about: 'Dr. Sarah Johnson is a leading cardiologist specializing in preventative heart care, diagnostic echocardiography, and non-invasive cardiovascular therapy.',
+      expertise: ['Preventive Cardiology', 'Heart Failure Management', 'Hypertension Control', 'Echocardiography'],
+      education: ['MBBS – Lady Hardinge Medical College', 'MD (Cardiology) – AIIMS'],
+      memberships: ['Cardiological Society of India (CSI)', 'American College of Cardiology (ACC)'],
+      languages: ['English', 'Hindi']
     },
     {
       id: 'doc-2',
       name: 'Dr. Michael Chen',
       specialty: 'Dermatologist',
+      degrees: 'MBBS, MD (Dermatology)',
       location: 'Skin Care Clinic, Mumbai',
       rating: 4.6,
       reviewsCount: 98,
       fee: 700,
-      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=256&h=256',
+      avatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'male',
-      experience: '9 years exp.',
-      availableTypes: ['in-person', 'video']
+      experience: '9 Years Experience',
+      availableTypes: ['in-person', 'video'],
+      about: 'Dr. Michael Chen is an expert clinical and cosmetic dermatologist specializing in eczema, acne management, and modern skin rejuvenation protocols.',
+      expertise: ['Cosmetic Dermatology', 'Acne Treatment', 'Laser Therapy', 'Psoriasis Care'],
+      education: ['MBBS – KEM Hospital', 'MD (DVL) – Mumbai University'],
+      memberships: ['Indian Association of Dermatologists (IADVL)'],
+      languages: ['English', 'Hindi']
     },
     {
       id: 'doc-3',
       name: 'Dr. Priya Sharma',
       specialty: 'General Physician',
+      degrees: 'MBBS, MD (General Medicine)',
       location: 'ARI Hospital, Delhi',
       rating: 4.7,
       reviewsCount: 210,
       fee: 500,
-      avatar: 'https://images.unsplash.com/photo-1594824813686-25f0e1f7c1d7?auto=format&fit=crop&q=80&w=256&h=256',
+      avatar: 'https://images.unsplash.com/photo-1594824813686-25f0e1f7c1d7?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'female',
-      experience: '14 years exp.',
-      availableTypes: ['in-person', 'video']
+      experience: '14 Years Experience',
+      availableTypes: ['in-person', 'video'],
+      about: 'Dr. Priya Sharma provides comprehensive internal medicine care, specializing in chronic disease lifestyle modifications, diabetic care, and seasonal infections.',
+      expertise: ['Internal Medicine', 'Type 2 Diabetes', 'Geriatric Care', 'Infectious Diseases'],
+      education: ['MBBS – Maulana Azad Medical College', 'MD (Internal Medicine) – Delhi University'],
+      memberships: ['Association of Physicians of India (API)'],
+      languages: ['English', 'Hindi', 'Punjabi']
     },
     {
       id: 'doc-4',
       name: 'Dr. Anil Mehta',
       specialty: 'Orthopedic',
+      degrees: 'MBBS, MS (Orthopedics)',
       location: 'City Hospital, Delhi',
       rating: 4.9,
       reviewsCount: 156,
       fee: 600,
-      avatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=256&h=256',
+      avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'male',
-      experience: '16 years exp.',
-      availableTypes: ['in-person']
-    },
-    {
-      id: 'doc-5',
-      name: 'Dr. Kavita Rao',
-      specialty: 'ENT Specialist',
-      location: 'ARI Hospital, Delhi',
-      rating: 4.8,
-      reviewsCount: 87,
-      fee: 500,
-      avatar: 'https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&q=80&w=256&h=256',
-      gender: 'female',
-      experience: '10 years exp.',
-      availableTypes: ['in-person', 'video']
-    },
-    {
-      id: 'doc-6',
-      name: 'Dr. Rajesh Kumar',
-      specialty: 'General Physician',
-      location: 'Health Care Center, Noida',
-      rating: 4.5,
-      reviewsCount: 64,
-      fee: 400,
-      avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=256&h=256',
-      gender: 'male',
-      experience: '8 years exp.',
-      availableTypes: ['in-person']
+      experience: '16 Years Experience',
+      availableTypes: ['in-person'],
+      about: 'Dr. Anil Mehta is a senior orthopedic consultant specializing in joint replacement, sports trauma, and spinal degenerative conditions.',
+      expertise: ['Joint Replacement', 'Arthroscopy', 'Spine Disorders', 'Sports Injury Rehabilitation'],
+      education: ['MBBS – AIIMS, New Delhi', 'MS (Orthopedics) – AIIMS, New Delhi'],
+      memberships: ['Indian Orthopaedic Association (IOA)', 'Delhi Orthopaedic Association (DOA)'],
+      languages: ['English', 'Hindi']
     }
   ];
 
-  // Available Dates for Slot Booking
-  const availableDates = [
-    { day: 'Today', date: '11', month: 'Sep', full: '11 Sep 2026' },
-    { day: 'Sat', date: '12', month: 'Sep', full: '12 Sep 2026' },
-    { day: 'Sun', date: '13', month: 'Sep', full: '13 Sep 2026' },
-    { day: 'Mon', date: '14', month: 'Sep', full: '14 Sep 2026' },
-    { day: 'Tue', date: '15', month: 'Sep', full: '15 Sep 2026' }
+  // Currently selected doctor for detailed booking
+  const [selectedDoctor, setSelectedDoctor] = useState(allDoctors[0]);
+
+  // Find a Doctor Filter States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [consultationType, setConsultationType] = useState('in-person');
+
+  // Booking details state
+  const [selectedDate, setSelectedDate] = useState('Tue, 16 Sep');
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState('10:30 AM');
+  const [selectedPatient, setSelectedPatient] = useState('John Doe (Self)');
+  const [reasonForVisit, setReasonForVisit] = useState('');
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [confirmedPaymentType, setConfirmedPaymentType] = useState('Pay Now');
+
+  // Date carousel items for OPD consultation
+  const dateOptions = [
+    { day: 'Tue', date: '16 Sep', full: 'Tue, 16 Sep' },
+    { day: 'Wed', date: '17 Sep', full: 'Wed, 17 Sep' },
+    { day: 'Thu', date: '18 Sep', full: 'Thu, 18 Sep' },
+    { day: 'Fri', date: '19 Sep', full: 'Fri, 19 Sep' },
+    { day: 'Sat', date: '20 Sep', full: 'Sat, 20 Sep' },
+    { day: 'Sun', date: '21 Sep', full: 'Sun, 21 Sep' },
+    { day: 'Mon', date: '22 Sep', full: 'Mon, 22 Sep' }
   ];
 
-  // Time Slots by Period
-  const timeSlots = {
-    morning: ['09:00 AM', '09:45 AM', '10:30 AM', '11:15 AM'],
-    afternoon: ['02:00 PM', '02:45 PM', '03:30 PM'],
-    evening: ['04:15 PM', '05:00 PM', '05:45 PM', '06:30 PM']
-  };
+  // Time slots matching the design
+  const timeSlotsRow1 = ['09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM'];
+  const timeSlotsRow2 = ['11:30 AM', '12:00 PM', '12:30 PM', '01:00 PM'];
 
-  // Filter Logic
+  // Filter logic
   const filteredDoctors = allDoctors.filter(doc => {
-    // Search query matches name, specialty, or location
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch = !q ||
       doc.name.toLowerCase().includes(q) ||
       doc.specialty.toLowerCase().includes(q) ||
       doc.location.toLowerCase().includes(q);
-
-    // Specialty filter
     const matchesSpecialty = !selectedSpecialty || doc.specialty === selectedSpecialty;
-
-    // Location filter
-    const matchesLocation = !selectedLocation || doc.location === selectedLocation;
-
-    // Consultation Type filter
+    const matchesLocation = !selectedLocation || doc.location.includes(selectedLocation);
     const matchesType = !consultationType || doc.availableTypes.includes(consultationType);
-
     return matchesSearch && matchesSpecialty && matchesLocation && matchesType;
   });
 
-  const handleResetFilters = () => {
-    setSearchQuery('');
-    setSelectedSpecialty('');
-    setSelectedLocation('');
-    setConsultationType('in-person');
+  const handleSelectDoctorForBooking = (doc) => {
+    setSelectedDoctor(doc);
+    setViewMode('details');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleOpenSlots = (doctor) => {
-    setSelectedDoctor(doctor);
-    setSelectedDateIndex(0);
-    setSelectedTimeSlot('10:30 AM');
-    setPatientNote('');
-    setBookingSuccessData(null);
-    setIsSlotModalOpen(true);
-  };
-
-  const handleConfirmBooking = () => {
-    const bookingId = `APT-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-    const bookedDate = availableDates[selectedDateIndex].full;
-    setBookingSuccessData({
-      bookingId,
-      doctor: selectedDoctor.name,
-      specialty: selectedDoctor.specialty,
-      location: selectedDoctor.location,
-      date: bookedDate,
-      time: selectedTimeSlot,
-      fee: selectedDoctor.fee,
-      type: consultationType === 'video' ? 'Video Consultation' : 'In-Person Consultation'
-    });
+  const handleOpenPayment = (paymentType) => {
+    setConfirmedPaymentType(paymentType);
+    setShowConfirmationModal(true);
   };
 
   return (
-    <div className="book-appointment-page">
-      {/* Global Navigation */}
+    <div className="bg-light min-vh-100 d-flex flex-column" style={{ backgroundColor: '#f8fafc' }}>
+      {/* Global Navbar */}
       <Navbar />
 
-      {/* Main Container */}
-      <div className="book-appointment-container">
-        <div className="book-appointment-grid">
-          {/* ========================================================
-              LEFT COLUMN: FIND A DOCTOR FILTER CARD
-             ======================================================== */}
-          <aside className="find-doctor-card">
-            <div className="find-doctor-header">
-              <h2 className="find-doctor-title">
-                Find a Doctor <span className="find-doctor-indicator"></span>
-              </h2>
-            </div>
-
-            <form onSubmit={(e) => e.preventDefault()}>
-              {/* Search by doctor name, specialty or symptoms */}
-              <div className="find-doctor-group">
-                <input
-                  type="text"
-                  className="find-doctor-input"
-                  placeholder="Search by doctor name, specialty or symptoms..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+      {/* VIEW 1: FIND A DOCTOR (LISTING WITH PREVIOUS LEFT FILTER CARD) */}
+      {viewMode === 'listing' && (
+        <div className="book-appointment-container flex-grow-1 py-4">
+          <div className="book-appointment-grid">
+            {/* ========================================================
+                LEFT COLUMN: FIND A DOCTOR FILTER CARD (REVERTED AS REQUESTED)
+               ======================================================== */}
+            <aside className="find-doctor-card">
+              <div className="find-doctor-header">
+                <h2 className="find-doctor-title">
+                  Find a Doctor <span className="find-doctor-indicator"></span>
+                </h2>
               </div>
 
-              {/* Specialty Dropdown */}
-              <div className="find-doctor-group">
-                <label className="find-doctor-label">Specialty</label>
-                <select
-                  className="find-doctor-select"
-                  value={selectedSpecialty}
-                  onChange={(e) => setSelectedSpecialty(e.target.value)}
-                >
-                  <option value="">Select Specialty</option>
-                  <option value="Cardiologist">Cardiologist</option>
-                  <option value="Dermatologist">Dermatologist</option>
-                  <option value="General Physician">General Physician</option>
-                  <option value="Orthopedic">Orthopedic</option>
-                  <option value="ENT Specialist">ENT Specialist</option>
-                </select>
-              </div>
-
-              {/* Location Dropdown */}
-              <div className="find-doctor-group">
-                <label className="find-doctor-label">Location</label>
-                <select
-                  className="find-doctor-select"
-                  value={selectedLocation}
-                  onChange={(e) => setSelectedLocation(e.target.value)}
-                >
-                  <option value="">Select Location</option>
-                  <option value="ARI Hospital, Delhi">ARI Hospital, Delhi</option>
-                  <option value="Skin Care Clinic, Mumbai">Skin Care Clinic, Mumbai</option>
-                  <option value="City Hospital, Delhi">City Hospital, Delhi</option>
-                  <option value="Health Care Center, Noida">Health Care Center, Noida</option>
-                </select>
-              </div>
-
-              {/* Consultation Type */}
-              <div className="find-doctor-group">
-                <label className="find-doctor-label">Consultation Type</label>
-                <div className="consultation-radio-group">
-                  <label className="consultation-radio-item">
-                    <input
-                      type="radio"
-                      name="consultationType"
-                      className="consultation-radio-input"
-                      checked={consultationType === 'in-person'}
-                      onChange={() => setConsultationType('in-person')}
-                    />
-                    <span className="consultation-radio-text">In-Person</span>
-                  </label>
-
-                  <label className="consultation-radio-item">
-                    <input
-                      type="radio"
-                      name="consultationType"
-                      className="consultation-radio-input"
-                      checked={consultationType === 'video'}
-                      onChange={() => setConsultationType('video')}
-                    />
-                    <span className="consultation-radio-text">Video Consultation</span>
-                  </label>
+              <form onSubmit={(e) => e.preventDefault()} className="find-doctor-form">
+                {/* Search by doctor name or condition */}
+                <div className="find-doctor-group">
+                  <label className="find-doctor-label">Search</label>
+                  <input
+                    type="text"
+                    className="find-doctor-input"
+                    placeholder="Doctor name or condition..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
                 </div>
-              </div>
 
-              {/* Search Button */}
-              <button
-                type="button"
-                className="btn-search-doctors"
-                onClick={() => {}}
-              >
-                Search
-              </button>
+                {/* Specialty Dropdown */}
+                <div className="find-doctor-group">
+                  <label className="find-doctor-label">Specialty</label>
+                  <select
+                    className="find-doctor-select"
+                    value={selectedSpecialty}
+                    onChange={(e) => setSelectedSpecialty(e.target.value)}
+                  >
+                    <option value="">All Specialties</option>
+                    <option value="ENT Specialist">ENT Specialist</option>
+                    <option value="Cardiologist">Cardiologist</option>
+                    <option value="Dermatologist">Dermatologist</option>
+                    <option value="General Physician">General Physician</option>
+                    <option value="Orthopedic">Orthopedic</option>
+                  </select>
+                </div>
 
-              {/* Clear filters if any filter is active */}
-              {(searchQuery || selectedSpecialty || selectedLocation || consultationType !== 'in-person') && (
+                {/* Location Dropdown */}
+                <div className="find-doctor-group">
+                  <label className="find-doctor-label">Location</label>
+                  <select
+                    className="find-doctor-select"
+                    value={selectedLocation}
+                    onChange={(e) => setSelectedLocation(e.target.value)}
+                  >
+                    <option value="">All Locations</option>
+                    <option value="Noida">Noida</option>
+                    <option value="ARI Hospital, Delhi">ARI Hospital, Delhi</option>
+                    <option value="Skin Care Clinic, Mumbai">Skin Care Clinic, Mumbai</option>
+                    <option value="City Hospital, Delhi">City Hospital, Delhi</option>
+                    <option value="Health Care Center, Noida">Health Care Center, Noida</option>
+                  </select>
+                </div>
+
+                {/* Consultation Type Radio */}
+                <div className="find-doctor-group">
+                  <label className="find-doctor-label">Consultation Type</label>
+                  <div className="consultation-radio-group">
+                    <label className="consultation-radio-item">
+                      <input
+                        type="radio"
+                        name="consultationType"
+                        className="consultation-radio-input"
+                        checked={consultationType === 'in-person'}
+                        onChange={() => setConsultationType('in-person')}
+                      />
+                      <span className="consultation-radio-text">In-Person</span>
+                    </label>
+
+                    <label className="consultation-radio-item">
+                      <input
+                        type="radio"
+                        name="consultationType"
+                        className="consultation-radio-input"
+                        checked={consultationType === 'video'}
+                        onChange={() => setConsultationType('video')}
+                      />
+                      <span className="consultation-radio-text">Video Consultation</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Search Button */}
                 <button
                   type="button"
-                  className="btn-reset-filters"
-                  onClick={handleResetFilters}
+                  className="btn-search-doctors"
+                  onClick={() => {}}
                 >
-                  Reset all filters
+                  Search
                 </button>
-              )}
-            </form>
-          </aside>
 
-          {/* ========================================================
-              RIGHT COLUMN: DOCTOR CARDS LIST
-             ======================================================== */}
-          <main className="doctors-list-section">
-            <div className="doctors-list-header">
-              <span className="doctors-count-text">
-                Showing {filteredDoctors.length} available {filteredDoctors.length === 1 ? 'specialist' : 'specialists'}
-              </span>
+                {/* Clear filters if any filter is active */}
+                {(searchQuery || selectedSpecialty || selectedLocation || consultationType !== 'in-person') && (
+                  <button
+                    type="button"
+                    className="btn-reset-filters"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedSpecialty('');
+                      setSelectedLocation('');
+                      setConsultationType('in-person');
+                    }}
+                    style={{
+                      width: '100%',
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#64748B',
+                      fontSize: '0.88rem',
+                      fontWeight: '600',
+                      marginTop: '12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Reset all filters
+                  </button>
+                )}
+              </form>
+            </aside>
+
+            {/* ========================================================
+                RIGHT COLUMN: DOCTOR CARDS LIST
+               ======================================================== */}
+            <main className="doctors-list-section">
+              <div className="doctors-list-header">
+                <span className="doctors-count-text">
+                  Showing {filteredDoctors.length} available {filteredDoctors.length === 1 ? 'specialist' : 'specialists'}
+                </span>
+              </div>
+
+              {filteredDoctors.length === 0 ? (
+                <div className="card border-0 p-5 text-center bg-white rounded-4">
+                  <i className="fas fa-user-md fs-1 text-muted mb-3"></i>
+                  <h5 className="fw-bold">No doctors found</h5>
+                  <p className="text-muted small mb-3">Try adjusting your search criteria, specialty, or location.</p>
+                  <button
+                    className="btn btn-outline-primary mx-auto"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedSpecialty('');
+                      setSelectedLocation('');
+                      setConsultationType('in-person');
+                    }}
+                  >
+                    Clear all filters
+                  </button>
+                </div>
+              ) : (
+                filteredDoctors.map((doc) => (
+                  <div className="doctor-card" key={doc.id}>
+                    {/* Doctor Left Info: Avatar + Details */}
+                    <div className="doctor-card-left">
+                      <div className="doctor-avatar-wrapper">
+                        <img
+                          src={doc.avatar}
+                          alt={doc.name}
+                          className="doctor-avatar-img"
+                          onError={(e) => {
+                            e.target.src = 'https://i.postimg.cc/k47Z6t44/default-doctor.png';
+                          }}
+                        />
+                        <span className="doctor-online-badge" title="Available for appointments"></span>
+                      </div>
+
+                      <div className="doctor-primary-details">
+                        <h3 className="doctor-name-title">{doc.name}</h3>
+                        <p className="doctor-specialty-link">{doc.specialty} • {doc.degrees}</p>
+                        <p className="doctor-location-text">
+                          <i className="fas fa-map-marker-alt text-muted"></i> {doc.location} • {doc.experience}
+                        </p>
+                        <div className="doctor-rating-row">
+                          <span className="doctor-rating-star">★</span>
+                          <span className="doctor-rating-score">{doc.rating}</span>
+                          <span className="doctor-reviews-count">({doc.reviewsCount} reviews)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Doctor Right Info: Fee + Book Appointment Button */}
+                    <div className="doctor-card-right">
+                      <div className="doctor-fee-box">
+                        <div className="doctor-fee-amount">₹{doc.fee.toLocaleString()}</div>
+                        <div className="doctor-fee-label">Consultation Fee</div>
+                      </div>
+
+                      {/* CHANGED FROM "View Slots" to "Book Appointment" */}
+                      <button
+                        type="button"
+                        className="btn-view-slots"
+                        onClick={() => handleSelectDoctorForBooking(doc)}
+                      >
+                        Book Appointment
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </main>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW 2: BOOK OPD CONSULTATION (MATCHING THE REFERENCE DESIGN EXACTLY) */}
+      {viewMode === 'details' && (
+        <main className="container-fluid px-3 px-xl-5 py-3 py-lg-4 flex-grow-1">
+          <div className="row g-3 g-lg-4">
+            {/* Left Sidebar Menu */}
+            <div className="col-12 col-md-4 col-lg-3">
+              <div className="card border border-light-subtle shadow-sm rounded-3 bg-white p-3 mb-3">
+                <h6 className="fw-bold text-dark mb-3 px-1">Book Appointment</h6>
+
+                <div className="nav flex-column gap-1">
+                  {/* OPD Consultation (Active) */}
+                  <button
+                    type="button"
+                    className="btn d-flex align-items-center w-100 text-start py-2.5 px-3 rounded-2 bg-primary bg-opacity-10 text-white fw-semibold border-start border-4 border-primary rounded-start-0"
+                    style={{ fontSize: '0.92rem' }}
+                  >
+                    <i className="fa-solid fa-stethoscope fs-6 me-3 text-white" style={{ width: '20px', textAlign: 'center' }}></i>
+                    <span>OPD Consultation</span>
+                  </button>
+
+                  {/* Book Lab Test */}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/appointments?tab=lab')}
+                    className="btn d-flex align-items-center w-100 text-start py-2.5 px-3 rounded-2 text-secondary bg-transparent fw-medium border-0"
+                    style={{ fontSize: '0.92rem' }}
+                  >
+                    <i className="fa-solid fa-flask fs-6 me-3" style={{ width: '20px', textAlign: 'center' }}></i>
+                    <span>Book Lab Test</span>
+                  </button>
+
+                  {/* Book Radiology */}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/appointments?tab=radiology')}
+                    className="btn d-flex align-items-center w-100 text-start py-2.5 px-3 rounded-2 text-secondary bg-transparent fw-medium border-0"
+                    style={{ fontSize: '0.92rem' }}
+                  >
+                    <i className="fa-solid fa-x-ray fs-6 me-3" style={{ width: '20px', textAlign: 'center' }}></i>
+                    <span>Book Radiology</span>
+                  </button>
+
+
+                  {/* My Appointments */}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/appointments')}
+                    className="btn d-flex align-items-center w-100 text-start py-2.5 px-3 rounded-2 text-secondary bg-transparent fw-medium border-0"
+                    style={{ fontSize: '0.92rem' }}
+                  >
+                    <i className="fa-regular fa-calendar-check fs-6 me-3" style={{ width: '20px', textAlign: 'center' }}></i>
+                    <span>My Appointments</span>
+                  </button>
+
+                  {/* Health Records */}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/health-records')}
+                    className="btn d-flex align-items-center w-100 text-start py-2.5 px-3 rounded-2 text-secondary bg-transparent fw-medium border-0"
+                    style={{ fontSize: '0.92rem' }}
+                  >
+                    <i className="fa-regular fa-clipboard fs-6 me-3" style={{ width: '20px', textAlign: 'center' }}></i>
+                    <span>Health Records</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {filteredDoctors.length === 0 ? (
-              <div className="card border-0 p-5 text-center bg-white rounded-4">
-                <i className="fas fa-user-md fs-1 text-muted mb-3"></i>
-                <h5 className="fw-bold">No doctors found</h5>
-                <p className="text-muted small mb-3">Try adjusting your search criteria, specialty, or location.</p>
-                <button className="btn btn-outline-primary mx-auto" onClick={handleResetFilters}>
-                  Clear all filters
+            {/* Right Section: Doctor Profile + Booking Details */}
+            <div className="col-12 col-md-8 col-lg-9">
+              {/* Header with Title and "Change Doctor" link */}
+              <div className="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <div>
+                  <h5 className="fw-bold text-dark mb-1">Book OPD Consultation</h5>
+                  <p className="text-secondary small mb-0">Find a doctor, select your appointment details and proceed to payment.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('listing')}
+                  className="btn btn-link text-primary text-decoration-none fw-semibold p-0 d-inline-flex align-items-center gap-1 shadow-none"
+                  style={{ fontSize: '0.9rem' }}
+                >
+                  <i className="fa-solid fa-arrow-left me-1"></i> Change Doctor
                 </button>
               </div>
-            ) : (
-              filteredDoctors.map((doc) => (
-                <div className="doctor-card" key={doc.id}>
-                  {/* Doctor Left Info: Avatar + Details */}
-                  <div className="doctor-card-left">
-                    <div className="doctor-avatar-wrapper">
+
+              {/* Two Column Layout */}
+              <div className="row g-3">
+                {/* Left Column: Doctor Profile & Details */}
+                <div className="col-12 col-lg-6">
+                  <div className="card border border-light-subtle rounded-3 bg-white p-4 shadow-sm h-100">
+                    {/* Doctor Top Header Info */}
+                    <div className="d-flex gap-3 mb-3">
                       <img
-                        src={doc.avatar}
-                        alt={doc.name}
-                        className="doctor-avatar-img"
+                        src={selectedDoctor.avatar}
+                        alt={selectedDoctor.name}
+                        className="rounded-3 shadow-sm border border-light-subtle"
+                        style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                         onError={(e) => {
                           e.target.src = 'https://i.postimg.cc/k47Z6t44/default-doctor.png';
                         }}
                       />
-                      <span className="doctor-online-badge" title="Available for appointments"></span>
-                    </div>
+                      <div className="flex-grow-1">
+                        <h5 className="fw-bold text-dark mb-1">{selectedDoctor.name}</h5>
+                        <div className="text-secondary fw-semibold small mb-1">{selectedDoctor.specialty}</div>
+                        <div className="text-muted small mb-2">{selectedDoctor.degrees}</div>
 
-                    <div className="doctor-primary-details">
-                      <h3 className="doctor-name-title">{doc.name}</h3>
-                      <p className="doctor-specialty-link">{doc.specialty}</p>
-                      <p className="doctor-location-text">
-                        <i className="fas fa-map-marker-alt text-muted"></i> {doc.location}
-                      </p>
-                      <div className="doctor-rating-row">
-                        <span className="doctor-rating-star">★</span>
-                        <span className="doctor-rating-score">{doc.rating}</span>
-                        <span className="doctor-reviews-count">({doc.reviewsCount} reviews)</span>
+                        <div className="d-flex flex-column gap-1 small text-muted">
+                          <div className="d-flex align-items-center gap-1 text-secondary">
+                            <i className="fa-solid fa-briefcase text-primary small"></i>
+                            <span>{selectedDoctor.experience}</span>
+                          </div>
+                          <div className="d-flex align-items-center gap-1">
+                            <i className="fa-solid fa-star text-warning"></i>
+                            <strong className="text-dark">{selectedDoctor.rating}</strong>
+                            <span className="text-muted">({selectedDoctor.reviewsCount} reviews)</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Doctor Right Info: Fee + View Slots Button */}
-                  <div className="doctor-card-right">
-                    <div className="doctor-fee-box">
-                      <div className="doctor-fee-amount">₹{doc.fee}</div>
-                      <div className="doctor-fee-label">Consultation Fee</div>
+                    {/* Doctor Attributes Grid */}
+                    <div className="row g-3 py-2 border-top border-bottom border-light-subtle my-2">
+                      {/* Specialty */}
+                      <div className="col-6">
+                        <div className="d-flex align-items-start gap-2">
+                          <i className="fa-regular fa-hospital text-primary mt-1"></i>
+                          <div>
+                            <span className="text-muted small d-block" style={{ fontSize: '0.78rem' }}>Specialty</span>
+                            <strong className="text-dark small">{selectedDoctor.specialty.replace(' Specialist', '')}</strong>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Consultation Type */}
+                      <div className="col-6">
+                        <div className="d-flex align-items-start gap-2">
+                          <i className="fa-solid fa-stethoscope text-primary mt-1"></i>
+                          <div>
+                            <span className="text-muted small d-block" style={{ fontSize: '0.78rem' }}>Consultation Type</span>
+                            <strong className="text-dark small">In-Person, Video Consultation</strong>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Languages Spoken */}
+                      <div className="col-12">
+                        <div className="d-flex align-items-start gap-2">
+                          <i className="fa-regular fa-comments text-primary mt-1"></i>
+                          <div>
+                            <span className="text-muted small d-block mb-1" style={{ fontSize: '0.78rem' }}>Languages Spoken</span>
+                            <div className="d-flex flex-wrap gap-1">
+                              {(selectedDoctor.languages || ['English', 'Hindi']).map((lang) => (
+                                <span key={lang} className="badge bg-primary bg-opacity-10 text-primary fw-normal px-2.5 py-1 rounded-pill" style={{ fontSize: '0.78rem' }}>
+                                  {lang}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Consultation Fee */}
+                      <div className="col-6">
+                        <div className="d-flex align-items-start gap-2">
+                          <i className="fa-solid fa-indian-rupee-sign text-primary mt-1"></i>
+                          <div>
+                            <span className="text-muted small d-block" style={{ fontSize: '0.78rem' }}>Consultation Fee</span>
+                            <h5 className="fw-bold text-dark mb-0">₹{selectedDoctor.fee.toLocaleString()}</h5>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Location */}
+                      <div className="col-6">
+                        <div className="d-flex align-items-start gap-2">
+                          <i className="fa-solid fa-location-dot text-primary mt-1"></i>
+                          <div>
+                            <span className="text-muted small d-block" style={{ fontSize: '0.78rem' }}>Location</span>
+                            <strong className="text-dark small">{selectedDoctor.location}</strong>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    <button
-                      type="button"
-                      className="btn-view-slots"
-                      onClick={() => handleOpenSlots(doc)}
-                    >
-                      View Slots
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </main>
-        </div>
-      </div>
+                    {/* About Section */}
+                    <div className="mt-3">
+                      <h6 className="fw-bold text-dark mb-1" style={{ fontSize: '0.92rem' }}>About</h6>
+                      <p className="text-secondary small lh-base mb-3">
+                        {selectedDoctor.about || 'Experienced medical specialist committed to providing compassionate care and evidence-based treatment to patients of all age groups.'}
+                      </p>
 
-      {/* ========================================================
-          INTERACTIVE "VIEW SLOTS" BOOKING MODAL
-         ======================================================== */}
-      {isSlotModalOpen && selectedDoctor && (
-        <div className="modal-backdrop-custom" onClick={() => setIsSlotModalOpen(false)}>
-          <div className="modal-dialog-custom" style={{ maxWidth: '620px' }} onClick={(e) => e.stopPropagation()}>
-            {!bookingSuccessData ? (
-              <>
-                <div className="modal-header-custom">
-                  <h5 className="fw-bold">Select Appointment Slot</h5>
-                  <button className="modal-close-btn" onClick={() => setIsSlotModalOpen(false)}>
-                    <i className="fas fa-times"></i>
-                  </button>
-                </div>
+                      {/* Areas of Expertise */}
+                      <h6 className="fw-bold text-dark mb-1" style={{ fontSize: '0.92rem' }}>Areas of Expertise</h6>
+                      <ul className="text-secondary small ps-3 mb-3">
+                        {(selectedDoctor.expertise || ['Head & Neck Surgery', 'Sinus Disorders', 'Pediatric Care', 'Hearing Disorders']).map((item, idx) => (
+                          <li key={idx} className="mb-0.5">{item}</li>
+                        ))}
+                      </ul>
 
-                <div className="modal-body-custom">
-                  {/* Doctor Summary Banner */}
-                  <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-4">
-                    <img
-                      src={selectedDoctor.avatar}
-                      alt={selectedDoctor.name}
-                      style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover' }}
-                    />
-                    <div className="flex-grow-1">
-                      <h6 className="fw-bold mb-1 text-dark">{selectedDoctor.name}</h6>
-                      <div className="small text-primary fw-semibold">{selectedDoctor.specialty}</div>
-                      <div className="small text-muted">{selectedDoctor.location}</div>
-                    </div>
-                    <div className="text-end">
-                      <div className="fw-bold fs-5 text-dark">₹{selectedDoctor.fee}</div>
-                      <span className="badge bg-primary-subtle text-primary">
-                        {consultationType === 'video' ? 'Video' : 'In-Person'}
-                      </span>
-                    </div>
-                  </div>
+                      {/* Education */}
+                      <h6 className="fw-bold text-dark mb-1" style={{ fontSize: '0.92rem' }}>Education</h6>
+                      <ul className="text-secondary small ps-3 mb-3">
+                        {(selectedDoctor.education || ['MBBS – AIIMS, New Delhi', 'MD – AIIMS, New Delhi']).map((item, idx) => (
+                          <li key={idx} className="mb-0.5">{item}</li>
+                        ))}
+                      </ul>
 
-                  {/* Date Selector Tabs */}
-                  <label className="form-label fw-bold small text-muted text-uppercase mb-2">
-                    1. Choose Date
-                  </label>
-                  <div className="slot-date-tabs">
-                    {availableDates.map((d, index) => (
-                      <button
-                        key={d.full}
-                        type="button"
-                        className={`slot-date-tab ${selectedDateIndex === index ? 'active' : ''}`}
-                        onClick={() => setSelectedDateIndex(index)}
-                      >
-                        <span className="slot-date-day">{d.day}</span>
-                        <span className="slot-date-num">{d.date}</span>
-                        <small>{d.month}</small>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Time Slots Selection */}
-                  <label className="form-label fw-bold small text-muted text-uppercase mb-2">
-                    2. Choose Time Slot ({availableDates[selectedDateIndex].full})
-                  </label>
-
-                  {/* Morning */}
-                  <div className="slot-period-group">
-                    <div className="slot-period-title">
-                      <i className="far fa-sun text-warning"></i> Morning Slots
+                      {/* Memberships */}
+                      <h6 className="fw-bold text-dark mb-1" style={{ fontSize: '0.92rem' }}>Memberships</h6>
+                      <ul className="text-secondary small ps-3 mb-0">
+                        {(selectedDoctor.memberships || ['Association of Otolaryngologists of India (AOI)', 'Indian Medical Association (IMA)']).map((item, idx) => (
+                          <li key={idx} className="mb-0.5">{item}</li>
+                        ))}
+                      </ul>
                     </div>
-                    <div className="slot-pills-container">
-                      {timeSlots.morning.map(slot => (
-                        <button
-                          key={slot}
-                          type="button"
-                          className={`slot-time-pill ${selectedTimeSlot === slot ? 'selected' : ''}`}
-                          onClick={() => setSelectedTimeSlot(slot)}
-                        >
-                          {slot}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Afternoon */}
-                  <div className="slot-period-group">
-                    <div className="slot-period-title">
-                      <i className="fas fa-cloud-sun text-primary"></i> Afternoon Slots
-                    </div>
-                    <div className="slot-pills-container">
-                      {timeSlots.afternoon.map(slot => (
-                        <button
-                          key={slot}
-                          type="button"
-                          className={`slot-time-pill ${selectedTimeSlot === slot ? 'selected' : ''}`}
-                          onClick={() => setSelectedTimeSlot(slot)}
-                        >
-                          {slot}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Evening */}
-                  <div className="slot-period-group">
-                    <div className="slot-period-title">
-                      <i className="far fa-moon text-secondary"></i> Evening Slots
-                    </div>
-                    <div className="slot-pills-container">
-                      {timeSlots.evening.map(slot => (
-                        <button
-                          key={slot}
-                          type="button"
-                          className={`slot-time-pill ${selectedTimeSlot === slot ? 'selected' : ''}`}
-                          onClick={() => setSelectedTimeSlot(slot)}
-                        >
-                          {slot}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Optional Patient Symptoms / Notes */}
-                  <div className="mt-3">
-                    <label className="form-label fw-bold small text-muted text-uppercase">
-                      3. Symptoms / Reason for Visit (Optional)
-                    </label>
-                    <textarea
-                      className="form-control"
-                      rows="2"
-                      placeholder="Briefly describe your symptoms or medical concern..."
-                      value={patientNote}
-                      onChange={(e) => setPatientNote(e.target.value)}
-                    ></textarea>
                   </div>
                 </div>
 
-                <div className="modal-footer-custom">
-                  <button className="btn btn-light" onClick={() => setIsSlotModalOpen(false)}>
-                    Cancel
-                  </button>
-                  <button className="btn btn-primary px-4 fw-bold" onClick={handleConfirmBooking}>
-                    Confirm &amp; Book Slot
-                  </button>
-                </div>
-              </>
-            ) : (
-              /* Booking Success Confirmation State */
-              <>
-                <div className="modal-header-custom border-0 pb-0">
-                  <button className="modal-close-btn ms-auto" onClick={() => setIsSlotModalOpen(false)}>
-                    <i className="fas fa-times"></i>
-                  </button>
-                </div>
-                <div className="modal-body-custom text-center pt-0 px-4">
-                  <div
-                    className="mx-auto rounded-circle d-flex align-items-center justify-content-center text-white mb-3"
-                    style={{ width: '70px', height: '70px', background: '#22C55E', fontSize: '2rem' }}
-                  >
-                    <i className="fas fa-check"></i>
-                  </div>
-                  <h4 className="fw-bold text-dark mb-1">Appointment Confirmed!</h4>
-                  <p className="text-muted small mb-4">
-                    Your appointment has been successfully booked with <strong>{bookingSuccessData.doctor}</strong>.
-                  </p>
-
-                  <div className="card bg-light border-0 p-3 text-start mb-4">
-                    <div className="d-flex justify-content-between mb-2">
-                      <span className="text-muted small">Appointment ID:</span>
-                      <strong className="text-primary">{bookingSuccessData.bookingId}</strong>
-                    </div>
-                    <div className="d-flex justify-content-between mb-2">
-                      <span className="text-muted small">Specialist:</span>
-                      <span>{bookingSuccessData.doctor} ({bookingSuccessData.specialty})</span>
-                    </div>
-                    <div className="d-flex justify-content-between mb-2">
-                      <span className="text-muted small">Date &amp; Time:</span>
-                      <strong>{bookingSuccessData.date}, {bookingSuccessData.time}</strong>
-                    </div>
-                    <div className="d-flex justify-content-between mb-2">
-                      <span className="text-muted small">Location:</span>
-                      <span>{bookingSuccessData.location}</span>
-                    </div>
-                    <div className="d-flex justify-content-between mb-2">
-                      <span className="text-muted small">Mode:</span>
-                      <span className="badge bg-primary-subtle text-primary">{bookingSuccessData.type}</span>
-                    </div>
-                    <div className="d-flex justify-content-between pt-2 border-top">
-                      <span className="text-muted small">Consultation Fee:</span>
-                      <strong className="text-dark">₹{bookingSuccessData.fee}</strong>
-                    </div>
-                  </div>
-
-                  <div className="alert alert-info small d-flex align-items-center mb-0">
-                    <i className="fas fa-info-circle me-2 fs-5"></i>
+                {/* Right Column: Appointment Booking & Payment */}
+                <div className="col-12 col-lg-6">
+                  <div className="card border border-light-subtle rounded-3 bg-white p-4 shadow-sm h-100 d-flex flex-column justify-content-between">
                     <div>
-                      An SMS confirmation with hospital token and instructions has been sent to your registered mobile number.
+                      {/* 1. Select Appointment Date & Time */}
+                      <h6 className="fw-bold text-dark mb-2" style={{ fontSize: '0.95rem' }}>Select Appointment Date & Time</h6>
+
+                      {/* Date Carousel Row */}
+                      <div className="d-flex align-items-center gap-1 mb-3">
+                        <button
+                          type="button"
+                          className="btn btn-outline-light border text-secondary px-2 py-2 rounded-2"
+                          style={{ fontSize: '0.8rem' }}
+                        >
+                          <i className="fa-solid fa-chevron-left"></i>
+                        </button>
+
+                        <div className="d-flex gap-1 overflow-x-auto flex-grow-1 py-1">
+                          {dateOptions.map((item) => {
+                            const isSelected = selectedDate === item.full;
+                            return (
+                              <button
+                                key={item.full}
+                                type="button"
+                                onClick={() => setSelectedDate(item.full)}
+                                className={`btn p-2 rounded-2 text-center flex-grow-1 ${
+                                  isSelected
+                                    ? 'btn-primary text-white shadow-sm'
+                                    : 'btn-outline-light border text-dark bg-white'
+                                }`}
+                                style={{ minWidth: '58px' }}
+                              >
+                                <div className="small fw-normal" style={{ fontSize: '0.72rem' }}>{item.day}</div>
+                                <div className="fw-bold" style={{ fontSize: '0.84rem' }}>{item.date}</div>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <button
+                          type="button"
+                          className="btn btn-outline-light border text-secondary px-2 py-2 rounded-2"
+                          style={{ fontSize: '0.8rem' }}
+                        >
+                          <i className="fa-solid fa-chevron-right"></i>
+                        </button>
+                      </div>
+
+                      {/* Available Time Slots Header */}
+                      <div className="small fw-semibold text-dark mb-2">
+                        Available Time Slots – {selectedDate} 2026
+                      </div>
+
+                      {/* Time Slots Grid */}
+                      <div className="d-flex flex-wrap gap-2 mb-2">
+                        {timeSlotsRow1.map((slot) => {
+                          const isSelected = selectedTimeSlot === slot;
+                          return (
+                            <button
+                              key={slot}
+                              type="button"
+                              onClick={() => setSelectedTimeSlot(slot)}
+                              className={`btn btn-sm rounded-2 px-2.5 py-1.5 ${
+                                isSelected
+                                  ? 'btn-primary text-white fw-bold shadow-sm'
+                                  : 'btn-outline-primary'
+                              }`}
+                              style={{ fontSize: '0.8rem' }}
+                            >
+                              {slot}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="d-flex flex-wrap gap-2 mb-3">
+                        {timeSlotsRow2.map((slot) => {
+                          const isSelected = selectedTimeSlot === slot;
+                          return (
+                            <button
+                              key={slot}
+                              type="button"
+                              onClick={() => setSelectedTimeSlot(slot)}
+                              className={`btn btn-sm rounded-2 px-2.5 py-1.5 ${
+                                isSelected
+                                  ? 'btn-primary text-white fw-bold shadow-sm'
+                                  : 'btn-outline-primary'
+                              }`}
+                              style={{ fontSize: '0.8rem' }}
+                            >
+                              {slot}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <hr className="my-3 border-light-subtle" />
+
+                      {/* 2. Patient Details */}
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <h6 className="fw-bold text-dark mb-0" style={{ fontSize: '0.95rem' }}>Patient Details</h6>
+                        <button
+                          type="button"
+                          className="btn btn-link text-primary text-decoration-none fw-semibold p-0 small"
+                          onClick={() => alert('Add Family Member')}
+                        >
+                          + Add New Patient
+                        </button>
+                      </div>
+
+                      <div className="mb-2">
+                        <label className="form-label small text-muted mb-1">Select Patient</label>
+                        <div className="input-group input-group-sm">
+                          <span className="input-group-text bg-white border-end-0 text-muted">
+                            <i className="fa-regular fa-user"></i>
+                          </span>
+                          <select
+                            className="form-select border-start-0 text-dark fw-medium"
+                            value={selectedPatient}
+                            onChange={(e) => setSelectedPatient(e.target.value)}
+                            style={{ fontSize: '0.88rem' }}
+                          >
+                            <option value="John Doe (Self)">John Doe (Self)</option>
+                            <option value="Sarah Doe (Spouse)">Sarah Doe (Spouse)</option>
+                            <option value="Leo Doe (Son)">Leo Doe (Son)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Patient info strip */}
+                      <div className="row g-2 py-2 border-bottom border-light-subtle mb-3 text-secondary small">
+                        <div className="col-4">
+                          <span className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Patient Name</span>
+                          <strong className="text-dark">John Doe</strong>
+                        </div>
+                        <div className="col-4">
+                          <span className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Age / Gender</span>
+                          <strong className="text-dark">35 Years / Male</strong>
+                        </div>
+                        <div className="col-4">
+                          <span className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Mobile Number</span>
+                          <strong className="text-dark">9876543210</strong>
+                        </div>
+                      </div>
+
+                      {/* Reason for Visit (Optional) */}
+                      <div className="mb-3">
+                        <div className="d-flex justify-content-between">
+                          <label className="form-label small text-muted mb-1">Reason for Visit (Optional)</label>
+                          <span className="small text-muted">{reasonForVisit.length}/200</span>
+                        </div>
+                        <input
+                          type="text"
+                          maxLength={200}
+                          className="form-control form-control-sm"
+                          placeholder="e.g. Ear pain, hearing issue, follow up, etc."
+                          value={reasonForVisit}
+                          onChange={(e) => setReasonForVisit(e.target.value)}
+                          style={{ fontSize: '0.88rem' }}
+                        />
+                      </div>
+
+                      <hr className="my-3 border-light-subtle" />
+
+                      {/* 3. Appointment Summary */}
+                      <h6 className="fw-bold text-dark mb-2" style={{ fontSize: '0.95rem' }}>Appointment Summary</h6>
+                      <div className="border border-light-subtle rounded-3 p-3 bg-light bg-opacity-50 small mb-3">
+                        <div className="row g-2">
+                          <div className="col-6">
+                            <div className="d-flex align-items-center gap-2">
+                              <i className="fa-solid fa-user-doctor text-primary"></i>
+                              <div>
+                                <span className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Doctor</span>
+                                <strong className="text-dark">{selectedDoctor.name}</strong>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-6">
+                            <div className="d-flex align-items-center gap-2">
+                              <i className="fa-solid fa-stethoscope text-primary"></i>
+                              <div>
+                                <span className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Specialty</span>
+                                <strong className="text-dark">{selectedDoctor.specialty.replace(' Specialist', '')}</strong>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-6">
+                            <div className="d-flex align-items-center gap-2">
+                              <i className="fa-regular fa-calendar-days text-primary"></i>
+                              <div>
+                                <span className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Date &amp; Time</span>
+                                <strong className="text-dark">{selectedDate} 2026, {selectedTimeSlot}</strong>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-6">
+                            <div className="d-flex align-items-center gap-2">
+                              <i className="fa-regular fa-user text-primary"></i>
+                              <div>
+                                <span className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Patient</span>
+                                <strong className="text-dark">{selectedPatient}</strong>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-12 pt-2 border-top border-light-subtle d-flex justify-content-between align-items-center">
+                            <div className="d-flex align-items-center gap-2">
+                              <i className="fa-solid fa-receipt text-primary"></i>
+                              <span className="text-muted">Consultation Fee</span>
+                            </div>
+                            <h5 className="fw-bold text-dark mb-0">₹{selectedDoctor.fee.toLocaleString()}</h5>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 4. Action Buttons */}
+                    <div className="d-flex gap-3 pt-2">
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary py-2.5 px-3 flex-grow-1 fw-semibold d-flex align-items-center justify-content-center gap-2"
+                        onClick={() => handleOpenPayment('Pay at Hospital')}
+                      >
+                        <i className="fa-regular fa-file-lines"></i>
+                        <span>Pay at Hospital</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary py-2.5 px-3 flex-grow-1 fw-semibold d-flex align-items-center justify-content-center gap-2"
+                        onClick={() => handleOpenPayment('Pay Now')}
+                      >
+                        <i className="fa-regular fa-credit-card"></i>
+                        <span>Pay Now</span>
+                      </button>
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      )}
 
-                <div className="modal-footer-custom justify-content-center gap-3">
+      {/* Confirmation & Payment Modal */}
+      {showConfirmationModal && (
+        <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(15, 23, 42, 0.55)', zIndex: 1060 }}>
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content rounded-4 border-0 shadow">
+              <div className="modal-header border-bottom py-3 px-4 bg-light rounded-top-4">
+                <h5 className="modal-title fw-bold text-dark mb-0">
+                  Appointment Confirmed!
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close shadow-none"
+                  aria-label="Close"
+                  onClick={() => setShowConfirmationModal(false)}
+                ></button>
+              </div>
+
+              <div className="modal-body p-4 text-center">
+                <div
+                  className="mx-auto rounded-circle d-flex align-items-center justify-content-center text-white mb-3"
+                  style={{ width: '60px', height: '60px', background: '#10B981', fontSize: '1.5rem' }}
+                >
+                  <i className="fa-solid fa-check"></i>
+                </div>
+                <h5 className="fw-bold text-dark mb-1">Booking Successful</h5>
+                <p className="text-secondary small mb-3">
+                  Your appointment has been registered with <strong>{selectedDoctor.name}</strong>.
+                </p>
+
+                <div className="border border-light-subtle rounded-3 p-3 bg-light text-start small mb-3">
+                  <div className="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                    <span className="text-muted">Appointment ID:</span>
+                    <strong className="text-primary">ARI-OPD-2026-9842</strong>
+                  </div>
+                  <div className="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                    <span className="text-muted">Date &amp; Time:</span>
+                    <strong className="text-dark">{selectedDate} 2026, {selectedTimeSlot}</strong>
+                  </div>
+                  <div className="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                    <span className="text-muted">Doctor:</span>
+                    <span className="text-dark">{selectedDoctor.name} ({selectedDoctor.specialty})</span>
+                  </div>
+                  <div className="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                    <span className="text-muted">Patient:</span>
+                    <span className="text-dark">{selectedPatient}</span>
+                  </div>
+                  <div className="d-flex justify-content-between py-1">
+                    <span className="text-muted">Payment Mode:</span>
+                    <strong className="text-success">{confirmedPaymentType} (₹{selectedDoctor.fee.toLocaleString()})</strong>
+                  </div>
+                </div>
+
+                <div className="alert alert-info bg-info bg-opacity-10 border-0 text-dark small py-2 px-3 text-start mb-0">
+                  <i className="fa-solid fa-circle-info text-info me-1"></i> An SMS and WhatsApp notification with your OPD Token #14 has been sent.
+                </div>
+              </div>
+
+              <div className="modal-footer border-top py-3 px-4 bg-light rounded-bottom-4 d-flex justify-content-between">
+                <button
+                  type="button"
+                  className="btn btn-light border px-3"
+                  onClick={() => setShowConfirmationModal(false)}
+                >
+                  Close
+                </button>
+                <div className="d-flex gap-2">
                   <button
-                    className="btn btn-outline-secondary"
-                    onClick={() => setIsSlotModalOpen(false)}
+                    type="button"
+                    className="btn btn-outline-primary px-3"
+                    onClick={() => window.print()}
                   >
-                    Book Another
+                    <i className="fa-solid fa-print me-1"></i> Print Slip
                   </button>
                   <button
-                    className="btn btn-primary px-4 fw-bold"
+                    type="button"
+                    className="btn btn-primary px-3"
                     onClick={() => {
-                      setIsSlotModalOpen(false);
+                      setShowConfirmationModal(false);
                       navigate('/appointments');
                     }}
                   >
-                    <i className="fas fa-calendar-check me-2"></i> Go to My Appointments
+                    My Appointments
                   </button>
                 </div>
-              </>
-            )}
+              </div>
+            </div>
           </div>
         </div>
       )}
