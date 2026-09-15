@@ -101,16 +101,9 @@ export default function Navbar() {
             <img 
               src="https://i.postimg.cc/K8xgWmqf/logo-hal.png" 
               alt="ARI-Health Logo" 
-              style={{ height: '42px', width: 'auto' }}
+              style={{ height: '52px', width: 'auto' }}
             />
-            <div className="d-none d-sm-flex flex-column">
-              <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--primary-color)', letterSpacing: '-0.02em', lineHeight: 1 }}>
-                ARI-HEALTH
-              </span>
-              <span style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 600, letterSpacing: '0.05em' }}>
-                Patient Portal <span className="badge bg-primary-subtle text-primary" style={{ fontSize: '0.62rem' }}>24x7</span>
-              </span>
-            </div>
+           
           </Link>
           
           {/* Center: Navigation Menu Toggle Button for Mobile */}
