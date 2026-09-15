@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 export default function BookAppointment({ defaultView = 'listing' }) {
   const navigate = useNavigate();
@@ -12,110 +10,162 @@ export default function BookAppointment({ defaultView = 'listing' }) {
   // Doctors Database
   const allDoctors = [
     {
-      id: 'doc-amit',
-      name: 'Dr. Amit Kumar Pandit',
+      id: 'doc-101',
+      name: 'Dr. Rajeshwar Singhal',
       specialty: 'ENT Specialist',
-      degrees: 'MBBS, MD (AIIMS)',
-      location: 'Noida',
-      rating: 4.7,
-      reviewsCount: 124,
-      fee: 1200,
+      degrees: 'MBBS, MS (Otorhinolaryngology), DNB',
+      location: 'Health Care Center, Noida',
+      rating: 4.9,
+      reviewsCount: 188,
+      fee: 1100,
       avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'male',
-      experience: '10 Years Experience',
+      experience: '15 Years Experience',
       availableTypes: ['in-person', 'video'],
-      about: 'Dr. Amit Kumar Pandit is an experienced ENT specialist with expertise in treating a wide range of ear, nose and throat conditions. He is committed to providing compassionate care and evidence-based treatment to patients of all age groups.',
+      about: 'Dr. Rajeshwar Singhal is a distinguished Otorhinolaryngologist specializing in advanced endoscopic sinus surgery, micro-ear reconstruction, pediatric airway issues, and allergy-induced breathing disorders.',
       expertise: [
-        'Head & Neck Surgery',
-        'Sinus Disorders',
-        'Pediatric ENT',
-        'Hearing Disorders'
+        'Endoscopic Sinus Surgery (FESS)',
+        'Micro-Ear Surgery & Tympanoplasty',
+        'Snoring & Sleep Apnea Care',
+        'Allergy & Rhinitis Management'
       ],
       education: [
-        'MBBS – AIIMS, New Delhi',
-        'MD (ENT) – AIIMS, New Delhi'
+        'MBBS – Christian Medical College (CMC), Vellore',
+        'MS (ENT) – Post Graduate Institute of Medical Education (PGIMER), Chandigarh',
+        'Fellowship in Advanced Rhinology – University of Zurich'
       ],
       memberships: [
         'Association of Otolaryngologists of India (AOI)',
-        'Indian Medical Association (IMA)'
+        'Indian Academy of Otolaryngology Head & Neck Surgery',
+        'European Rhinologic Society'
+      ],
+      languages: ['English', 'Hindi']
+    },
+    {
+      id: 'doc-102',
+      name: 'Dr. Ananya Mukherjee',
+      specialty: 'Cardiologist',
+      degrees: 'MBBS, MD (Medicine), DM (Cardiology), FACC',
+      location: 'ARI Hospital, Delhi',
+      rating: 4.9,
+      reviewsCount: 245,
+      fee: 1500,
+      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400&h=400',
+      gender: 'female',
+      experience: '18 Years Experience',
+      availableTypes: ['in-person', 'video'],
+      about: 'Dr. Ananya Mukherjee is a renowned senior interventional cardiologist with deep expertise in non-invasive clinical cardiology, transradial angioplasty, heart failure therapies, and advanced 3D echocardiography.',
+      expertise: [
+        'Coronary Angioplasty & Stenting',
+        'Valvular Heart Disease Treatment',
+        'Refractory Hypertension Management',
+        'Preventive Cardiovascular Care'
+      ],
+      education: [
+        'MBBS – Maulana Azad Medical College (MAMC), New Delhi',
+        'MD (Medicine) – Lady Hardinge Medical College, New Delhi',
+        'DM (Cardiology) – AIIMS, New Delhi'
+      ],
+      memberships: [
+        'Fellow of the American College of Cardiology (FACC)',
+        'Cardiological Society of India (CSI)',
+        'Indian College of Cardiology'
       ],
       languages: ['English', 'Hindi', 'Bengali']
     },
     {
-      id: 'doc-1',
-      name: 'Dr. Sarah Johnson',
-      specialty: 'Cardiologist',
-      degrees: 'MBBS, MD (Cardiology)',
-      location: 'ARI Hospital, Delhi',
-      rating: 4.8,
-      reviewsCount: 124,
-      fee: 800,
-      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400&h=400',
-      gender: 'female',
-      experience: '12 Years Experience',
-      availableTypes: ['in-person', 'video'],
-      about: 'Dr. Sarah Johnson is a leading cardiologist specializing in preventative heart care, diagnostic echocardiography, and non-invasive cardiovascular therapy.',
-      expertise: ['Preventive Cardiology', 'Heart Failure Management', 'Hypertension Control', 'Echocardiography'],
-      education: ['MBBS – Lady Hardinge Medical College', 'MD (Cardiology) – AIIMS'],
-      memberships: ['Cardiological Society of India (CSI)', 'American College of Cardiology (ACC)'],
-      languages: ['English', 'Hindi']
-    },
-    {
-      id: 'doc-2',
-      name: 'Dr. Michael Chen',
+      id: 'doc-103',
+      name: 'Dr. Vikramaditya Rathore',
       specialty: 'Dermatologist',
-      degrees: 'MBBS, MD (Dermatology)',
+      degrees: 'MBBS, MD (Dermatology, Venereology & Leprosy)',
       location: 'Skin Care Clinic, Mumbai',
-      rating: 4.6,
-      reviewsCount: 98,
-      fee: 700,
+      rating: 4.8,
+      reviewsCount: 162,
+      fee: 950,
       avatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'male',
-      experience: '9 Years Experience',
+      experience: '11 Years Experience',
       availableTypes: ['in-person', 'video'],
-      about: 'Dr. Michael Chen is an expert clinical and cosmetic dermatologist specializing in eczema, acne management, and modern skin rejuvenation protocols.',
-      expertise: ['Cosmetic Dermatology', 'Acne Treatment', 'Laser Therapy', 'Psoriasis Care'],
-      education: ['MBBS – KEM Hospital', 'MD (DVL) – Mumbai University'],
-      memberships: ['Indian Association of Dermatologists (IADVL)'],
-      languages: ['English', 'Hindi']
+      about: 'Dr. Vikramaditya Rathore is an expert consultant dermatologist specializing in clinical dermatology, targeted laser procedures, PRP hair restoration therapy, and biologics for chronic autoimmune skin conditions.',
+      expertise: [
+        'Clinical Dermatology & Eczema',
+        'Laser Skin Resurfacing',
+        'PRP Hair Restoration Therapy',
+        'Pigmentation & Severe Acne Protocols'
+      ],
+      education: [
+        'MBBS – Grant Government Medical College & Sir JJ Group of Hospitals, Mumbai',
+        'MD (DVL) – King Edward Memorial (KEM) Hospital, Mumbai'
+      ],
+      memberships: [
+        'Indian Association of Dermatologists, Venereologists and Leprologists (IADVL)',
+        'Cosmetic Dermatology Society of India (CDSI)'
+      ],
+      languages: ['English', 'Hindi', 'Marathi']
     },
     {
-      id: 'doc-3',
-      name: 'Dr. Priya Sharma',
+      id: 'doc-104',
+      name: 'Dr. Meenakshi Sundaram',
       specialty: 'General Physician',
-      degrees: 'MBBS, MD (General Medicine)',
-      location: 'ARI Hospital, Delhi',
-      rating: 4.7,
-      reviewsCount: 210,
-      fee: 500,
+      degrees: 'MBBS, MD (General Medicine), Dip. Diabetology',
+      location: 'Noida',
+      rating: 4.8,
+      reviewsCount: 310,
+      fee: 650,
       avatar: 'https://images.unsplash.com/photo-1594824813686-25f0e1f7c1d7?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'female',
       experience: '14 Years Experience',
       availableTypes: ['in-person', 'video'],
-      about: 'Dr. Priya Sharma provides comprehensive internal medicine care, specializing in chronic disease lifestyle modifications, diabetic care, and seasonal infections.',
-      expertise: ['Internal Medicine', 'Type 2 Diabetes', 'Geriatric Care', 'Infectious Diseases'],
-      education: ['MBBS – Maulana Azad Medical College', 'MD (Internal Medicine) – Delhi University'],
-      memberships: ['Association of Physicians of India (API)'],
-      languages: ['English', 'Hindi', 'Punjabi']
+      about: 'Dr. Meenakshi Sundaram is an accomplished physician focused on comprehensive adult medicine, diabetes reversal protocols, chronic lifestyle disorders, and infectious disease management.',
+      expertise: [
+        'Type 2 Diabetes & Insulin Therapy',
+        'Hypertension & Lipid Disorders',
+        'Thyroid Disorder Management',
+        'Infectious Diseases & Fever Protocols'
+      ],
+      education: [
+        'MBBS – Madras Medical College, Chennai',
+        'MD (General Medicine) – JIPMER, Puducherry',
+        'Diploma in Diabetology – Royal College of Physicians, UK'
+      ],
+      memberships: [
+        'Association of Physicians of India (API)',
+        'Research Society for the Study of Diabetes in India (RSSDI)',
+        'Indian Medical Association (IMA)'
+      ],
+      languages: ['English', 'Hindi', 'Tamil']
     },
     {
-      id: 'doc-4',
-      name: 'Dr. Anil Mehta',
+      id: 'doc-105',
+      name: 'Dr. Harpreet Singh Anand',
       specialty: 'Orthopedic',
-      degrees: 'MBBS, MS (Orthopedics)',
+      degrees: 'MBBS, MS (Orthopaedics), MCh (Ortho, UK)',
       location: 'City Hospital, Delhi',
       rating: 4.9,
-      reviewsCount: 156,
-      fee: 600,
+      reviewsCount: 218,
+      fee: 1250,
       avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'male',
-      experience: '16 Years Experience',
+      experience: '20 Years Experience',
       availableTypes: ['in-person'],
-      about: 'Dr. Anil Mehta is a senior orthopedic consultant specializing in joint replacement, sports trauma, and spinal degenerative conditions.',
-      expertise: ['Joint Replacement', 'Arthroscopy', 'Spine Disorders', 'Sports Injury Rehabilitation'],
-      education: ['MBBS – AIIMS, New Delhi', 'MS (Orthopedics) – AIIMS, New Delhi'],
-      memberships: ['Indian Orthopaedic Association (IOA)', 'Delhi Orthopaedic Association (DOA)'],
-      languages: ['English', 'Hindi']
+      about: 'Dr. Harpreet Singh Anand is a senior orthopedic surgeon internationally recognized for robotic total joint replacements, arthroscopic sports surgeries, and spinal reconstructive procedures.',
+      expertise: [
+        'Robotic Knee & Hip Arthroplasty',
+        'Arthroscopic ACL & Meniscus Repair',
+        'Cervical & Lumbar Spine Disorders',
+        'Complex Traumatic Fracture Fixation'
+      ],
+      education: [
+        'MBBS – Government Medical College, Amritsar',
+        'MS (Orthopedics) – AIIMS, New Delhi',
+        'MCh (Orthopaedics) – University of Dundee, UK'
+      ],
+      memberships: [
+        'Indian Orthopaedic Association (IOA)',
+        'International Society of Arthroscopy, Knee Surgery and Orthopaedic Sports Medicine (ISAKOS)',
+        'Delhi Orthopaedic Association (DOA)'
+      ],
+      languages: ['English', 'Hindi', 'Punjabi']
     }
   ];
 
@@ -131,7 +181,7 @@ export default function BookAppointment({ defaultView = 'listing' }) {
   // Booking details state
   const [selectedDate, setSelectedDate] = useState('Tue, 16 Sep');
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('10:30 AM');
-  const [selectedPatient, setSelectedPatient] = useState('John Doe (Self)');
+  const [selectedPatient, setSelectedPatient] = useState('Rahul Verma (Self)');
   const [reasonForVisit, setReasonForVisit] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmedPaymentType, setConfirmedPaymentType] = useState('Pay Now');
@@ -176,10 +226,7 @@ export default function BookAppointment({ defaultView = 'listing' }) {
   };
 
   return (
-    <div className="bg-light min-vh-100 d-flex flex-column" style={{ backgroundColor: '#f8fafc' }}>
-      {/* Global Navbar */}
-      <Navbar />
-
+    <div className="bg-light flex-grow-1 d-flex flex-column" style={{ backgroundColor: '#f8fafc' }}>
       {/* VIEW 1: FIND A DOCTOR (LISTING WITH PREVIOUS LEFT FILTER CARD) */}
       {viewMode === 'listing' && (
         <div className="book-appointment-container flex-grow-1 py-4">
@@ -728,9 +775,9 @@ export default function BookAppointment({ defaultView = 'listing' }) {
                             onChange={(e) => setSelectedPatient(e.target.value)}
                             style={{ fontSize: '0.88rem' }}
                           >
-                            <option value="John Doe (Self)">John Doe (Self)</option>
-                            <option value="Sarah Doe (Spouse)">Sarah Doe (Spouse)</option>
-                            <option value="Leo Doe (Son)">Leo Doe (Son)</option>
+                            <option value="Rahul Verma (Self)">Rahul Verma (Self)</option>
+                            <option value="Pooja Verma (Spouse)">Pooja Verma (Spouse)</option>
+                            <option value="Aarav Verma (Son)">Aarav Verma (Son)</option>
                           </select>
                         </div>
                       </div>
@@ -739,15 +786,15 @@ export default function BookAppointment({ defaultView = 'listing' }) {
                       <div className="row g-2 py-2 border-bottom border-light-subtle mb-3 text-secondary small">
                         <div className="col-4">
                           <span className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Patient Name</span>
-                          <strong className="text-dark">John Doe</strong>
+                          <strong className="text-dark">Rahul Verma</strong>
                         </div>
                         <div className="col-4">
                           <span className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Age / Gender</span>
-                          <strong className="text-dark">35 Years / Male</strong>
+                          <strong className="text-dark">34 Years / Male</strong>
                         </div>
                         <div className="col-4">
                           <span className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Mobile Number</span>
-                          <strong className="text-dark">9876543210</strong>
+                          <strong className="text-dark">+91 98102 34567</strong>
                         </div>
                       </div>
 
@@ -937,9 +984,6 @@ export default function BookAppointment({ defaultView = 'listing' }) {
           </div>
         </div>
       )}
-
-      {/* Global Footer */}
-      <Footer />
     </div>
   );
 }

@@ -93,9 +93,6 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-page">
-      {/* Navigation */}
-      <Navbar />
-
       {/* Dashboard Header */}
       <div className="dashboard-header">
         <div className="container-custom">
@@ -316,9 +313,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }

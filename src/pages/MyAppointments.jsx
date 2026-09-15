@@ -806,10 +806,7 @@ export default function MyAppointments() {
   );
 
   return (
-    <div className="appointments-page">
-      {/* Global Navigation Bar */}
-      <Navbar />
-
+    <div className="appointments-page flex-grow-1">
       {/* Main Container */}
       <div className="appointments-container">
         <div className="appointments-layout-grid">
@@ -2093,9 +2090,6 @@ export default function MyAppointments() {
           <span>{toastMessage.text}</span>
         </div>
       )}
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }

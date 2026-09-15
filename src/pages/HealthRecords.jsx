@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 export default function HealthRecords() {
   const [activeTab, setActiveTab] = useState('opd-prescriptions');
@@ -396,10 +394,7 @@ export default function HealthRecords() {
   };
 
   return (
-    <div className="bg-light min-vh-100 d-flex flex-column" style={{ backgroundColor: '#f8fafc' }}>
-      {/* Global Navbar */}
-      <Navbar />
-
+    <div className="bg-light flex-grow-1 d-flex flex-column" style={{ backgroundColor: '#f8fafc' }}>
       {/* Main Content Area */}
       <main className="container-fluid px-3 px-xl-5 py-3 py-lg-4 flex-grow-1">
         <div className="row g-3 g-lg-4">
@@ -1440,9 +1435,6 @@ export default function HealthRecords() {
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }
