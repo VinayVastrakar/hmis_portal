@@ -16,6 +16,12 @@ export const ENDPOINTS = {
     VERIFY_OTP: '/mobileController/verifyOtp',
     // LOGOUT: '/auth/logout',
   },
+  MASTER: {
+    GET_ALL_HOSPITALS: '/master/hospitalResponse/getAll/1',
+  },
+  APPOINTMENTS: {
+    HISTORY_LIST: '/mobileController/getAppointmentHistoryList'
+  },
   // USERS: {
   //   PROFILE: '/users/profile',
   //   UPDATE: '/users/update',
