@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import { apiService } from '../services/apiService';
+import { ENDPOINTS } from '../constants/apiEndpoints';
 
 export default function MyAppointments() {
   const [searchParams] = useSearchParams();
@@ -55,173 +59,113 @@ export default function MyAppointments() {
   }, [searchParams]);
 
   // Appointments Data
-  const [upcomingAppointments, setUpcomingAppointments] = useState([
-    {
-      id: 'up-1',
-      date: '20 Sep 2026',
-      dayTime: 'Sun, 11:30 AM',
-      doctor: 'Dr. Priya Sharma',
-      specialty: 'General Physician',
-      hospital: 'ARI Hospital, Delhi',
-      room: 'Room 5',
-      paymentStatus: 'Pending',
-      amount: 500,
-      status: 'pending'
-    },
-    {
-      id: 'up-2',
-      date: '28 Sep 2026',
-      dayTime: 'Mon, 10:15 AM',
-      doctor: 'Dr. Michael Chen',
-      specialty: 'Dermatologist',
-      hospital: 'Skin Care Clinic, Mumbai',
-      room: 'Room 2',
-      paymentStatus: 'Paid',
-      amount: 700,
-      status: 'confirmed'
-    }
-  ]);
+  const [upcomingAppointments, setUpcomingAppointments] = useState([]);
+  const [pastAppointments, setPastAppointments] = useState([]);
+  const [labAppointments, setLabAppointments] = useState([]);
+  const [radiologyAppointments, setRadiologyAppointments] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [pastAppointments, setPastAppointments] = useState([
-    {
-      id: 'past-1',
-      date: '15 Sep 2026',
-      dayTime: 'Tue, 04:00 PM',
-      doctor: 'Dr. Sarah Johnson',
-      specialty: 'Cardiologist',
-      hospital: 'ARI Hospital, Delhi',
-      room: 'Room 12',
-      tokenNo: 'TKN125',
-      paymentStatus: 'Paid',
-      amount: 800,
-      status: 'completed'
-    },
-    {
-      id: 'past-2',
-      date: '10 Aug 2026',
-      dayTime: 'Mon, 11:00 AM',
-      doctor: 'Dr. Anil Mehta',
-      specialty: 'Orthopedic',
-      hospital: 'City Hospital, Delhi',
-      room: 'Room 3',
-      tokenNo: 'TKN389',
-      paymentStatus: 'Paid',
-      amount: 600,
-      status: 'completed'
-    },
-    {
-      id: 'past-3',
-      date: '05 Jul 2026',
-      dayTime: 'Sat, 02:30 PM',
-      doctor: 'Dr. Kavita Rao',
-      specialty: 'ENT Specialist',
-      hospital: 'ARI Hospital, Delhi',
-      room: 'Room 7',
-      tokenNo: '-',
-      paymentStatus: 'Paid',
-      amount: 500,
-      status: 'cancelled'
-    },
-    {
-      id: 'past-4',
-      date: '12 Jun 2026',
-      dayTime: 'Fri, 10:00 AM',
-      doctor: 'Dr. Rajesh Kumar',
-      specialty: 'General Physician',
-      hospital: 'Health Care Center, Noida',
-      room: 'Room 1',
-      tokenNo: '-',
-      paymentStatus: 'Paid',
-      amount: 400,
-      status: 'completed'
+  useEffect(() => {
+    const data = localStorage.getItem('patientDetails');
+    const hospitalData = localStorage.getItem('selectedHospital');
+    let parsedPatient = null;
+    let parsedHospital = null;
+    if (data) {
+      try { parsedPatient = JSON.parse(data); } catch (e) {}
     }
-  ]);
+    if (hospitalData) {
+      try { parsedHospital = JSON.parse(hospitalData); } catch (e) {}
+    }
 
-  // Lab Appointments Data (Matches User Mockup Screenshot 100%)
-  const [labAppointments, setLabAppointments] = useState([
-    {
-      id: 'lab-1',
-      date: '18 Sep 2026',
-      dayTime: 'Fri, 08:00 AM',
-      testName: 'Complete Blood Count (CBC)',
-      department: 'Pathology Lab',
-      hospital: 'ARI Hospital, Delhi',
-      location: 'Lab - 1st Floor',
-      paymentStatus: 'Paid',
-      amount: 350,
-      status: 'Scheduled',
-      type: 'lab'
-    },
-    {
-      id: 'lab-2',
-      date: '25 Sep 2026',
-      dayTime: 'Fri, 09:00 AM',
-      testName: 'Thyroid Profile (T3, T4, TSH)',
-      department: 'Endocrinology Lab',
-      hospital: 'ARI Diagnostic Center, Delhi',
-      location: 'Main Pathology Wing',
-      paymentStatus: 'Pending',
-      amount: 500,
-      status: 'Scheduled',
-      type: 'lab'
-    },
-    {
-      id: 'lab-3',
-      date: '02 Oct 2026',
-      dayTime: 'Fri, 08:30 AM',
-      testName: 'Health Checkup Package',
-      department: 'Comprehensive Health',
-      hospital: 'ARI Hospital, Delhi',
-      location: 'Lab - 1st Floor',
-      paymentStatus: 'Paid',
-      amount: 1499,
-      status: 'Completed',
-      type: 'lab'
-    }
-  ]);
-
-  // Radiology Appointments Data (Matches User Mockup Screenshot 100%)
-  const [radiologyAppointments, setRadiologyAppointments] = useState([
-    {
-      id: 'rad-1',
-      date: '22 Sep 2026',
-      dayTime: 'Tue, 02:00 PM',
-      testName: 'X-Ray Chest (PA View)',
-      department: 'Radiology Dept',
-      hospital: 'ARI Hospital, Delhi',
-      location: 'Radiology - Ground Floor',
-      paymentStatus: 'Paid',
-      amount: 600,
-      status: 'Scheduled',
-      type: 'radiology'
-    },
-    {
-      id: 'rad-2',
-      date: '30 Sep 2026',
-      dayTime: 'Wed, 11:00 AM',
-      testName: 'Ultrasound Abdomen',
-      department: 'USG Department',
-      hospital: 'ARI Diagnostic Center, Delhi',
-      location: 'Ultrasound Suite 2',
-      paymentStatus: 'Pending',
-      amount: 1200,
-      status: 'Scheduled',
-      type: 'radiology'
-    },
-    {
-      id: 'rad-3',
-      date: '05 Oct 2026',
-      dayTime: 'Mon, 10:00 AM',
-      testName: 'MRI Brain',
-      department: 'Advanced Imaging',
-      hospital: 'City Scan Center, Delhi',
-      location: 'MRI Center - Ground Floor',
-      paymentStatus: 'Paid',
-      amount: 4500,
-      status: 'Completed',
-      type: 'radiology'
-    }
-  ]);
+    const fetchAppointments = async () => {
+      if (!parsedPatient || !parsedHospital) return;
+      
+      let deptCode = 'OPD';
+      if (activeMenu === 'radiology') deptCode = 'RAD';
+      if (activeMenu === 'lab') deptCode = 'LAB';
+      if (activeMenu === 'diagnostics') {
+         if (diagnosticTab === 'radiology') deptCode = 'RAD';
+         else if (diagnosticTab === 'lab') deptCode = 'LAB';
+         else deptCode = 'LAB,RAD';
+      }
+      
+      setIsLoading(true);
+      try {
+        const queryParams = new URLSearchParams({
+          hospitalId: parsedHospital.id,
+          patientId: parsedPatient.patientId,
+          deptTypeCode: deptCode,
+          includeAllHistory: 'true'
+        }).toString();
+        
+        const response = await apiService.get(`${ENDPOINTS.APPOINTMENTS.HISTORY_LIST}?${queryParams}`);
+        
+        if (response.status === 200 && response.response) {
+          const mapped = response.response.map(app => {
+            let when = app.appointmentDate || 'N/A';
+            let time = app.appointmentStartTime || (app.appointmentDate && app.appointmentDate.includes(' ') ? app.appointmentDate.split(' ')[1] : 'N/A');
+            if (when && when.includes(' ')) {
+              when = when.split(' ')[0];
+            }
+            
+            let opdStatus = 'pending';
+            let diagStatus = 'Scheduled';
+            
+            if (app.visitStatus === 'y') {
+              opdStatus = 'completed';
+              diagStatus = 'Completed';
+            } else if (app.visitStatus === 'c') {
+              opdStatus = 'cancelled';
+              diagStatus = 'Cancelled';
+            } else if (app.visitStatus === 'n') {
+              opdStatus = app.visitPaymentStatus === 'y' ? 'confirmed' : 'pending';
+              diagStatus = 'Scheduled';
+            }
+            
+            const isDiagnostic = deptCode.includes('LAB') || deptCode.includes('RAD');
+            
+            return {
+              id: app.visitId,
+              date: when,
+              dayTime: time,
+              doctor: app.doctorName || 'Not Assigned',
+              specialty: app.departmentName,
+              testName: app.doctorName ? '' : (app.departmentName || 'Diagnostic Test'),
+              department: app.departmentName,
+              hospital: parsedHospital.hospitalName,
+              location: parsedHospital.hospitalName,
+              room: 'Room Not Assigned',
+              tokenNo: '-',
+              paymentStatus: app.visitPaymentStatus === 'y' ? 'Paid' : 'Pending',
+              amount: app.billedAmount || 0,
+              status: isDiagnostic ? diagStatus : opdStatus,
+              type: app.departmentName?.toLowerCase().includes('lab') ? 'lab' : (app.departmentName?.toLowerCase().includes('rad') ? 'radiology' : 'opd')
+            };
+          });
+          
+          if (deptCode === 'OPD') {
+             const upcoming = mapped.filter(a => a.status === 'confirmed' || a.status === 'pending');
+             const past = mapped.filter(a => a.status === 'completed' || a.status === 'cancelled');
+             setUpcomingAppointments(upcoming);
+             setPastAppointments(past);
+          } else if (deptCode === 'LAB') {
+             setLabAppointments(mapped);
+          } else if (deptCode === 'RAD') {
+             setRadiologyAppointments(mapped);
+          } else {
+             setLabAppointments(mapped.filter(a => a.type === 'lab'));
+             setRadiologyAppointments(mapped.filter(a => a.type === 'radiology'));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch appointments:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchAppointments();
+  }, [activeMenu, diagnosticTab]);
 
   const showToast = (message, type = 'success') => {
     setToastMessage({ text: message, type });
@@ -492,7 +436,15 @@ export default function MyAppointments() {
             </tr>
           </thead>
           <tbody>
-            {labAppointments.length === 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan="6" className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : labAppointments.length === 0 ? (
               <tr>
                 <td colSpan="6" className="text-center py-5 text-muted">
                   No lab test appointments found.
@@ -689,7 +641,15 @@ export default function MyAppointments() {
             </tr>
           </thead>
           <tbody>
-            {radiologyAppointments.length === 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan="6" className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : radiologyAppointments.length === 0 ? (
               <tr>
                 <td colSpan="6" className="text-center py-5 text-muted">
                   No radiology appointments found.
@@ -993,7 +953,15 @@ export default function MyAppointments() {
                           </tr>
                         </thead>
                         <tbody>
-                          {upcomingAppointments.length === 0 ? (
+                          {isLoading ? (
+                            <tr>
+                              <td colSpan="6" className="text-center py-5">
+                                <div className="spinner-border text-primary" role="status">
+                                  <span className="visually-hidden">Loading...</span>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : upcomingAppointments.length === 0 ? (
                             <tr>
                               <td colSpan="6" className="text-center py-5 text-muted">
                                 No upcoming appointments found.
@@ -1121,7 +1089,15 @@ export default function MyAppointments() {
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredPastAppointments.length === 0 ? (
+                          {isLoading ? (
+                            <tr>
+                              <td colSpan="8" className="text-center py-5">
+                                <div className="spinner-border text-primary" role="status">
+                                  <span className="visually-hidden">Loading...</span>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : filteredPastAppointments.length === 0 ? (
                             <tr>
                               <td colSpan="8" className="text-center py-5 text-muted">
                                 No past appointments match the selected filter.

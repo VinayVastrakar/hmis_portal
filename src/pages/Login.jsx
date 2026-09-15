@@ -160,6 +160,7 @@ export default function Login() {
         // Store patient details if available
         if (data.response.patientIdResponseList && data.response.patientIdResponseList.length > 0) {
           localStorage.setItem('patientDetails', JSON.stringify(data.response.patientIdResponseList[0]));
+          localStorage.setItem('patientList', JSON.stringify(data.response.patientIdResponseList));
         }
         
         setAlert({ message: data.response.message || 'Login successful! Redirecting...', type: 'success' });

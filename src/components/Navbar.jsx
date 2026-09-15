@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { apiService } from '../services/apiService';
+import { ENDPOINTS } from '../constants/apiEndpoints';
 
 export default function Navbar() {
   const [isNavCollapsed, setIsNavCollapsed] = useState(true);
@@ -9,8 +11,11 @@ export default function Navbar() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showFamilyModal, setShowFamilyModal] = useState(false);
   const [showSwitchSubmenu, setShowSwitchSubmenu] = useState(false);
+  const [showHospitalMenu, setShowHospitalMenu] = useState(false);
   const [patients, setPatients] = useState([]);
   const [activePatientId, setActivePatientId] = useState(null);
+  const [hospitals, setHospitals] = useState([]);
+  const [activeHospital, setActiveHospital] = useState(null);
   const [newMemberName, setNewMemberName] = useState('');
   const [newMemberRelation, setNewMemberRelation] = useState('Spouse');
   const [newMemberDob, setNewMemberDob] = useState('');
@@ -20,25 +25,66 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const data = localStorage.getItem('patientDetails');
-    if (data) {
+    const activeData = localStorage.getItem('patientDetails');
+    const listData = localStorage.getItem('patientList');
+    
+    if (activeData) {
       try {
-        const parsed = JSON.parse(data);
-        setPatientData(parsed);
-        // Map local storage data to the expected activePatient format
-        setPatients([{
-          id: parsed.patientId || 1,
-          name: parsed.patientName || 'User',
-          relation: 'Self',
-          gender: 'N/A',
-          age: 'N/A',
-          dob: 'N/A',
-          patientId: parsed.patientId || 'N/A'
-        }]);
-        setActivePatientId(parsed.patientId || 1);
+        const parsedActive = JSON.parse(activeData);
+        setPatientData(parsedActive);
+        setActivePatientId(parsedActive.patientId || 1);
+        
+        if (listData) {
+          const parsedList = JSON.parse(listData);
+          const mappedPatients = parsedList.map(p => ({
+            id: p.patientId,
+            name: p.patientName,
+            relation: p.relation,
+            gender: p.gender || 'N/A',
+            age: p.age || 'N/A',
+            dob: 'N/A',
+            patientId: p.patientId,
+            originalData: p
+          }));
+          setPatients(mappedPatients);
+        } else {
+          setPatients([{
+            id: parsedActive.patientId || 1,
+            name: parsedActive.patientName || 'User',
+            relation: parsedActive.relation || 'Self',
+            gender: parsedActive.gender || 'N/A',
+            age: parsedActive.age || 'N/A',
+            dob: 'N/A',
+            patientId: parsedActive.patientId || 'N/A',
+            originalData: parsedActive
+          }]);
+        }
       } catch (e) {
         console.error("Failed to parse patient data", e);
       }
+    }
+
+    const fetchHospitals = async () => {
+      try {
+        const data = await apiService.get(ENDPOINTS.MASTER.GET_ALL_HOSPITALS);
+        if (data.status === 200 && data.response) {
+          setHospitals(data.response);
+          
+          const storedHospital = localStorage.getItem('selectedHospital');
+          if (storedHospital) {
+            setActiveHospital(JSON.parse(storedHospital));
+          } else if (data.response.length > 0) {
+            setActiveHospital(data.response[0]);
+            localStorage.setItem('selectedHospital', JSON.stringify(data.response[0]));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch hospitals:", error);
+      }
+    };
+
+    if (localStorage.getItem('token')) {
+      fetchHospitals();
     }
   }, []);
 
@@ -59,12 +105,35 @@ export default function Navbar() {
     setShowProfileMenu(false);
   };
 
+  const handleSelectHospital = (hospital) => {
+    setActiveHospital(hospital);
+    localStorage.setItem('selectedHospital', JSON.stringify(hospital));
+    setShowHospitalMenu(false);
+    showToast(`Switched to ${hospital.hospitalName}`);
+    
+    window.dispatchEvent(new Event('hospitalSwitched'));
+    setTimeout(() => {
+      window.location.reload();
+    }, 600);
+  };
+
   const handleSelectPatient = (patient) => {
-    // To be implemented later
-    console.log('Patient selected:', patient);
     setActivePatientId(patient.id);
+    
+    if (patient.originalData) {
+      setPatientData(patient.originalData);
+      localStorage.setItem('patientDetails', JSON.stringify(patient.originalData));
+      // Dispatch event in case components want to listen without reloading
+      window.dispatchEvent(new Event('patientSwitched'));
+    }
+    
     showToast(`Switched to ${patient.name}`);
     setShowProfileMenu(false);
+
+    // Reload the page to ensure all components fetch data for the new patient
+    setTimeout(() => {
+      window.location.reload();
+    }, 600);
   };
 
   const getInitials = (name) => {
@@ -84,9 +153,9 @@ export default function Navbar() {
   // Derive active patient from state
   const activePatient = patients.find(p => p.id === activePatientId) || {
     name: patientData?.patientName || 'User',
-    relation: 'Self',
-    gender: 'N/A',
-    age: 'N/A',
+    relation: patientData?.relation || 'Self',
+    gender: patientData?.gender || 'N/A',
+    age: patientData?.age || 'N/A',
     patientId: patientData?.patientId || 'N/A',
     abhaId: 'ABHA-XXXX-XXXX-XXXX',
     address: 'Not provided'
@@ -168,6 +237,74 @@ export default function Navbar() {
             
             {/* Right side: Notifications & User Profile */}
             <div className="d-flex align-items-center gap-3">
+              {/* Hospital Dropdown */}
+              <div className="position-relative">
+                <div 
+                  className="d-flex align-items-center gap-2 p-1 pe-2 rounded-pill cursor-pointer border"
+                  style={{ background: '#f8f9fa', cursor: 'pointer', transition: 'var(--transition)' }}
+                  onClick={() => {
+                    setShowHospitalMenu(!showHospitalMenu);
+                    setShowProfileMenu(false);
+                    setShowNotificationMenu(false);
+                  }}
+                  title="Select Hospital"
+                >
+                  <div 
+                    className="rounded-circle d-flex align-items-center justify-content-center text-white"
+                    style={{ width: '36px', height: '36px', background: '#1E60F4', fontSize: '0.9rem' }}
+                  >
+                    <i className="far fa-hospital"></i>
+                  </div>
+                  <div className="d-none d-md-flex flex-column justify-content-center" style={{ lineHeight: '1.2' }}>
+                    <span className="fw-semibold text-dark text-truncate" style={{ fontSize: '0.85rem', maxWidth: '120px' }}>
+                      {activeHospital ? activeHospital.hospitalName : 'Select Location'}
+                    </span>
+                    <span className="text-muted" style={{ fontSize: '0.65rem' }}>Hospital</span>
+                  </div>
+                  <i className="fas fa-chevron-down text-muted d-none d-md-block ms-1" style={{ fontSize: '0.7rem' }}></i>
+                </div>
+
+                {showHospitalMenu && (
+                  <div 
+                    className="dropdown-menu dropdown-menu-end show position-absolute mt-2 shadow-lg border-0 rounded-3" 
+                    style={{ right: 0, top: '100%', width: '280px', zIndex: 1050 }}
+                  >
+                    <div className="p-3 bg-light border-bottom">
+                      <span className="fw-bold text-dark small text-uppercase">Select Location</span>
+                    </div>
+                    <div className="list-group list-group-flush" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                      {hospitals.map((hospital) => (
+                        <button
+                          key={hospital.id}
+                          type="button"
+                          className="list-group-item list-group-item-action p-3 d-flex align-items-center justify-content-between"
+                          style={{ backgroundColor: activeHospital?.id === hospital.id ? '#f0f5ff' : 'transparent' }}
+                          onClick={() => handleSelectHospital(hospital)}
+                        >
+                          <div className="d-flex align-items-center gap-3">
+                            <div 
+                              className="rounded-circle d-flex align-items-center justify-content-center text-white" 
+                              style={{ width: '32px', height: '32px', background: activeHospital?.id === hospital.id ? '#1E60F4' : '#6c757d' }}
+                            >
+                              <i className="fas fa-building"></i>
+                            </div>
+                            <div>
+                              <div className="fw-bold small text-dark">{hospital.hospitalName}</div>
+                            </div>
+                          </div>
+                          {activeHospital?.id === hospital.id && (
+                            <i className="fas fa-check-circle text-primary"></i>
+                          )}
+                        </button>
+                      ))}
+                      {hospitals.length === 0 && (
+                        <div className="p-3 text-center text-muted small">No hospitals available</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Notification Bell */}
               <div className="position-relative">
                 <button 
@@ -177,6 +314,7 @@ export default function Navbar() {
                   onClick={() => {
                     setShowNotificationMenu(!showNotificationMenu);
                     setShowProfileMenu(false);
+                    setShowHospitalMenu(false);
                   }}
                   title="Notifications"
                 >
@@ -232,6 +370,7 @@ export default function Navbar() {
                     setShowProfileMenu(!showProfileMenu);
                     setShowNotificationMenu(false);
                     setShowSwitchSubmenu(false);
+                    setShowHospitalMenu(false);
                   }}
                   title="Account Menu"
                 >
