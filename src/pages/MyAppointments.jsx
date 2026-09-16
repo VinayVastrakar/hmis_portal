@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import PdfViewer from '../components/PdfViewer';
 import { apiService } from '../services/apiService';
 import { ENDPOINTS } from '../constants/apiEndpoints';
 
@@ -11,13 +12,17 @@ export default function MyAppointments() {
   // Navigation State
   const [activeMenu, setActiveMenu] = useState('opd'); // 'opd', 'radiology', 'lab', 'diagnostics'
   const [activeSubTab, setActiveSubTab] = useState('upcoming'); // 'upcoming', 'completed', 'cancelled'
-  const [pastFilter, setPastFilter] = useState('all'); // 'all', 'completed', 'cancelled'
+  const [historyFilter, setHistoryFilter] = useState('all_history'); // 'all_history', 'present'
   const [diagnosticTab, setDiagnosticTab] = useState('radiology'); // 'radiology', 'lab', 'all'
 
   // Modal States
   const [modalType, setModalType] = useState(null); // 'pay', 'reschedule', 'cancel', 'invoice', 'details', 'report', 'book-radiology', 'book-lab'
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
+  const [pdfUrl, setPdfUrl] = useState(null);
+  const [pdfName, setPdfName] = useState('');
+  const [showPdfViewer, setShowPdfViewer] = useState(false);
+  const [loadingPdfId, setLoadingPdfId] = useState(null);
 
   // Reschedule Form State
   const [rescheduleDate, setRescheduleDate] = useState('2026-10-20');
@@ -91,70 +96,123 @@ export default function MyAppointments() {
       
       setIsLoading(true);
       try {
-        const queryParams = new URLSearchParams({
-          hospitalId: parsedHospital.id,
-          patientId: parsedPatient.patientId,
-          deptTypeCode: deptCode,
-          includeAllHistory: 'true'
-        }).toString();
-        
-        const response = await apiService.get(`${ENDPOINTS.APPOINTMENTS.HISTORY_LIST}?${queryParams}`);
-        
-        if (response.status === 200 && response.response) {
-          const mapped = response.response.map(app => {
-            let when = app.appointmentDate || 'N/A';
-            let time = app.appointmentStartTime || (app.appointmentDate && app.appointmentDate.includes(' ') ? app.appointmentDate.split(' ')[1] : 'N/A');
-            if (when && when.includes(' ')) {
-              when = when.split(' ')[0];
-            }
-            
-            let opdStatus = 'pending';
-            let diagStatus = 'Scheduled';
-            
-            if (app.visitStatus === 'y') {
-              opdStatus = 'completed';
-              diagStatus = 'Completed';
-            } else if (app.visitStatus === 'c') {
-              opdStatus = 'cancelled';
-              diagStatus = 'Cancelled';
-            } else if (app.visitStatus === 'n') {
-              opdStatus = app.visitPaymentStatus === 'y' ? 'confirmed' : 'pending';
-              diagStatus = 'Scheduled';
-            }
-            
-            const isDiagnostic = deptCode.includes('LAB') || deptCode.includes('RAD');
-            
-            return {
-              id: app.visitId,
-              date: when,
-              dayTime: time,
-              doctor: app.doctorName || 'Not Assigned',
-              specialty: app.departmentName,
-              testName: app.doctorName ? '' : (app.departmentName || 'Diagnostic Test'),
-              department: app.departmentName,
-              hospital: parsedHospital.hospitalName,
-              location: parsedHospital.hospitalName,
-              room: 'Room Not Assigned',
-              tokenNo: '-',
-              paymentStatus: app.visitPaymentStatus === 'y' ? 'Paid' : 'Pending',
-              amount: app.billedAmount || 0,
-              status: isDiagnostic ? diagStatus : opdStatus,
-              type: app.departmentName?.toLowerCase().includes('lab') ? 'lab' : (app.departmentName?.toLowerCase().includes('rad') ? 'radiology' : 'opd')
-            };
+        if (activeMenu === 'opd' && activeSubTab === 'completed') {
+          const queryParams = new URLSearchParams({
+            patientId: parsedPatient.patientId,
+            page: 0,
+            size: 10
           });
           
-          if (deptCode === 'OPD') {
-             const upcoming = mapped.filter(a => a.status === 'confirmed' || a.status === 'pending');
-             const past = mapped.filter(a => a.status === 'completed' || a.status === 'cancelled');
-             setUpcomingAppointments(upcoming);
-             setPastAppointments(past);
-          } else if (deptCode === 'LAB') {
-             setLabAppointments(mapped);
-          } else if (deptCode === 'RAD') {
-             setRadiologyAppointments(mapped);
-          } else {
-             setLabAppointments(mapped.filter(a => a.type === 'lab'));
-             setRadiologyAppointments(mapped.filter(a => a.type === 'radiology'));
+          const response = await apiService.get(`${ENDPOINTS.APPOINTMENTS.OPD_REPORTS_LIST}?${queryParams.toString()}`);
+          
+          if (response.status === 200 && response.response && response.response.content) {
+            const mapped = response.response.content.map(app => {
+              let when = app.visitDateTime || 'N/A';
+              let time = 'N/A';
+              if (when && when.includes(' ')) {
+                const parts = when.split(' ');
+                when = parts[0];
+                time = parts[1];
+              }
+              
+              return {
+                id: app.visitId,
+                date: when,
+                dayTime: time,
+                doctor: app.doctorName || 'Not Assigned',
+                specialty: app.specialty,
+                testName: '',
+                department: app.specialty,
+                hospital: parsedHospital.hospitalName,
+                location: parsedHospital.hospitalName,
+                room: 'Room Not Assigned',
+                tokenNo: '-',
+                paymentStatus: 'Paid',
+                amount: 0,
+                status: 'completed',
+                type: 'opd',
+                prescriptionHdId: app.prescriptionHdId,
+                prescriptionStatus: app.prescriptionStatus
+              };
+            });
+            setPastAppointments(mapped);
+          }
+        } else {
+          const paramsObj = {
+            hospitalId: parsedHospital.id,
+            patientId: parsedPatient.patientId,
+            deptTypeCode: deptCode,
+            includeAllHistory: historyFilter === 'all_history' ? 'true' : 'false'
+          };
+          const queryParams = new URLSearchParams(paramsObj);
+          
+          if (activeMenu === 'opd') {
+            if (activeSubTab === 'upcoming') {
+              queryParams.append('visitStatus', 'n');
+            } else if (activeSubTab === 'cancelled') {
+              queryParams.append('visitStatus', 'c');
+            }
+          }
+          
+          const response = await apiService.get(`${ENDPOINTS.APPOINTMENTS.HISTORY_LIST}?${queryParams.toString()}`);
+          
+          if (response.status === 200 && response.response) {
+            const mapped = response.response.map(app => {
+              let when = app.appointmentDate || 'N/A';
+              let time = app.appointmentStartTime || (app.appointmentDate && app.appointmentDate.includes(' ') ? app.appointmentDate.split(' ')[1] : 'N/A');
+              if (when && when.includes(' ')) {
+                when = when.split(' ')[0];
+              }
+              
+              let opdStatus = 'pending';
+              let diagStatus = 'Scheduled';
+              
+              if (app.visitStatus === 'y') {
+                opdStatus = 'completed';
+                diagStatus = 'Completed';
+              } else if (app.visitStatus === 'c') {
+                opdStatus = 'cancelled';
+                diagStatus = 'Cancelled';
+              } else if (app.visitStatus === 'n') {
+                opdStatus = app.visitPaymentStatus === 'y' ? 'confirmed' : 'pending';
+                diagStatus = 'Scheduled';
+              }
+              
+              const isDiagnostic = deptCode.includes('LAB') || deptCode.includes('RAD');
+              
+              return {
+                id: app.visitId,
+                date: when,
+                dayTime: time,
+                doctor: app.doctorName || 'Not Assigned',
+                specialty: app.departmentName,
+                testName: app.doctorName ? '' : (app.departmentName || 'Diagnostic Test'),
+                department: app.departmentName,
+                hospital: parsedHospital.hospitalName,
+                location: parsedHospital.hospitalName,
+                room: 'Room Not Assigned',
+                tokenNo: '-',
+                paymentStatus: app.visitPaymentStatus === 'y' ? 'Paid' : 'Pending',
+                amount: app.billedAmount || 0,
+                status: isDiagnostic ? diagStatus : opdStatus,
+                type: app.departmentName?.toLowerCase().includes('lab') ? 'lab' : (app.departmentName?.toLowerCase().includes('rad') ? 'radiology' : 'opd')
+              };
+            });
+            
+            if (deptCode === 'OPD') {
+               if (activeSubTab === 'upcoming') {
+                 setUpcomingAppointments(mapped);
+               } else {
+                 setPastAppointments(mapped);
+               }
+            } else if (deptCode === 'LAB') {
+               setLabAppointments(mapped);
+            } else if (deptCode === 'RAD') {
+               setRadiologyAppointments(mapped);
+            } else {
+               setLabAppointments(mapped.filter(a => a.type === 'lab'));
+               setRadiologyAppointments(mapped.filter(a => a.type === 'radiology'));
+            }
           }
         }
       } catch (error) {
@@ -165,7 +223,7 @@ export default function MyAppointments() {
     };
     
     fetchAppointments();
-  }, [activeMenu, diagnosticTab]);
+  }, [activeMenu, diagnosticTab, activeSubTab, historyFilter]);
 
   const showToast = (message, type = 'success') => {
     setToastMessage({ text: message, type });
@@ -178,6 +236,45 @@ export default function MyAppointments() {
   const handleOpenPayModal = (app) => {
     setSelectedAppointment(app);
     setModalType('pay');
+  };
+
+  const handleOpenPrescriptionSlip = async (app) => {
+    if (!app.prescriptionHdId) {
+      showToast("No prescription available", "error");
+      return;
+    }
+    
+    try {
+      setLoadingPdfId(`${app.id}_prescription`);
+      const url = `${ENDPOINTS.APPOINTMENTS.OPD_PRESCRIPTION_SLIP}?prescriptionId=${app.prescriptionHdId}&flag=D`;
+      const blob = await apiService.getPdf(url);
+      const objUrl = URL.createObjectURL(blob);
+      setPdfUrl(objUrl);
+      setPdfName(`Prescription - ${app.date}`);
+      setShowPdfViewer(true);
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to load prescription", "error");
+    } finally {
+      setLoadingPdfId(null);
+    }
+  };
+
+  const handleOpenOpdSlip = async (app) => {
+    try {
+      setLoadingPdfId(`${app.id}_opd`);
+      const url = `${ENDPOINTS.APPOINTMENTS.OPD_CASE_SHEET_REPORT}?visitId=${app.id}&flag=d`;
+      const blob = await apiService.getPdf(url);
+      const objUrl = URL.createObjectURL(blob);
+      setPdfUrl(objUrl);
+      setPdfName(`OPD Slip - ${app.date}`);
+      setShowPdfViewer(true);
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to load OPD Slip", "error");
+    } finally {
+      setLoadingPdfId(null);
+    }
   };
 
   const handleProcessPayment = () => {
@@ -389,11 +486,7 @@ export default function MyAppointments() {
     }
   };
 
-  // Filtered past appointments based on status dropdown
-  const filteredPastAppointments = pastAppointments.filter(app => {
-    if (pastFilter === 'all') return true;
-    return app.status === pastFilter;
-  });
+
 
   // ========================================================
   // REUSABLE DIAGNOSTIC COMPONENT: LAB APPOINTMENTS CARD
@@ -888,21 +981,15 @@ export default function MyAppointments() {
                   <div className="appointment-subtabs">
                     <button
                       className={`subtab-btn ${activeSubTab === 'upcoming' ? 'active' : ''}`}
-                      onClick={() => {
-                        setActiveSubTab('upcoming');
-                        setPastFilter('all');
-                      }}
+                      onClick={() => setActiveSubTab('upcoming')}
                       type="button"
                     >
                       <i className="fas fa-calendar-alt"></i>
-                      Upcoming ({upcomingAppointments.length})
+                      Pending ({upcomingAppointments.length})
                     </button>
                     <button
                       className={`subtab-btn ${activeSubTab === 'completed' ? 'active' : ''}`}
-                      onClick={() => {
-                        setActiveSubTab('completed');
-                        setPastFilter('completed');
-                      }}
+                      onClick={() => setActiveSubTab('completed')}
                       type="button"
                     >
                       <i className="fas fa-check-circle"></i>
@@ -910,10 +997,7 @@ export default function MyAppointments() {
                     </button>
                     <button
                       className={`subtab-btn ${activeSubTab === 'cancelled' ? 'active' : ''}`}
-                      onClick={() => {
-                        setActiveSubTab('cancelled');
-                        setPastFilter('cancelled');
-                      }}
+                      onClick={() => setActiveSubTab('cancelled')}
                       type="button"
                     >
                       <i className="fas fa-ban"></i>
@@ -934,7 +1018,7 @@ export default function MyAppointments() {
                           <i className="far fa-clock"></i>
                         </div>
                         <div>
-                          <h3 className="section-title">Upcoming Appointments ({upcomingAppointments.length})</h3>
+                          <h3 className="section-title">Pending Appointments ({upcomingAppointments.length})</h3>
                           <p className="section-subtitle">Manage your upcoming OPD appointments.</p>
                         </div>
                       </div>
@@ -1052,26 +1136,27 @@ export default function MyAppointments() {
                         </div>
                         <div>
                           <h3 className="section-title">
-                            Past Appointments ({filteredPastAppointments.length})
+                            {activeSubTab === 'cancelled' ? 'Cancelled' : 'Completed'} Appointments ({pastAppointments.length})
                           </h3>
                           <p className="section-subtitle">
-                            View your completed and cancelled OPD appointments.
+                            View your {activeSubTab} OPD appointments.
                           </p>
                         </div>
                       </div>
 
-                      {/* Status Filter */}
-                      <div>
-                        <select
-                          className="status-filter-select"
-                          value={pastFilter}
-                          onChange={(e) => setPastFilter(e.target.value)}
-                        >
-                          <option value="all">All Status</option>
-                          <option value="completed">Completed</option>
-                          <option value="cancelled">Cancelled</option>
-                        </select>
-                      </div>
+                      {/* History Filter */}
+                      {activeSubTab !== 'completed' && (
+                        <div>
+                          <select
+                            className="status-filter-select"
+                            value={historyFilter}
+                            onChange={(e) => setHistoryFilter(e.target.value)}
+                          >
+                            <option value="all_history">All History</option>
+                            <option value="present">Present</option>
+                          </select>
+                        </div>
+                      )}
                     </div>
 
                     <div className="ari-table-responsive">
@@ -1097,14 +1182,14 @@ export default function MyAppointments() {
                                 </div>
                               </td>
                             </tr>
-                          ) : filteredPastAppointments.length === 0 ? (
+                          ) : pastAppointments.length === 0 ? (
                             <tr>
                               <td colSpan="8" className="text-center py-5 text-muted">
-                                No past appointments match the selected filter.
+                                No {activeSubTab} appointments found.
                               </td>
                             </tr>
                           ) : (
-                            filteredPastAppointments.map((app) => (
+                            pastAppointments.map((app) => (
                               <tr key={app.id}>
                                 <td>
                                   <div className="table-date-cell">
@@ -1146,13 +1231,32 @@ export default function MyAppointments() {
                                 </td>
                                 <td>
                                   {app.status === 'completed' ? (
-                                    <button
-                                      type="button"
-                                      className="btn-action-outline"
-                                      onClick={() => handleOpenInvoice(app)}
-                                    >
-                                      View Invoice
-                                    </button>
+                                    <div className="d-flex gap-2">
+                                      <button
+                                        type="button"
+                                        className="btn-action-outline"
+                                        onClick={() => handleOpenOpdSlip(app)}
+                                        disabled={loadingPdfId === `${app.id}_opd`}
+                                      >
+                                        {loadingPdfId === `${app.id}_opd` ? (
+                                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        ) : (
+                                          'OPD Slip'
+                                        )}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="btn-action-outline"
+                                        onClick={() => app.prescriptionHdId ? handleOpenPrescriptionSlip(app) : handleOpenInvoice(app)}
+                                        disabled={loadingPdfId === `${app.id}_prescription`}
+                                      >
+                                        {loadingPdfId === `${app.id}_prescription` ? (
+                                          <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        ) : (
+                                          app.prescriptionHdId ? 'Prescription Slip' : 'View Invoice'
+                                        )}
+                                      </button>
+                                    </div>
                                   ) : (
                                     <button
                                       type="button"
@@ -1173,7 +1277,7 @@ export default function MyAppointments() {
                     {/* Pagination Controls */}
                     <div className="section-card-footer">
                       <div className="pagination-info">
-                        Showing 1 to {filteredPastAppointments.length} of {filteredPastAppointments.length} appointments
+                        Showing 1 to {pastAppointments.length} of {pastAppointments.length} appointments
                       </div>
                       <div className="pagination-controls">
                         <button type="button" className="pagination-btn" disabled>
@@ -2089,6 +2193,18 @@ export default function MyAppointments() {
           <i className="fas fa-info-circle"></i>
           <span>{toastMessage.text}</span>
         </div>
+      )}
+
+      {/* PDF Viewer */}
+      {showPdfViewer && (
+        <PdfViewer 
+          pdfUrl={pdfUrl} 
+          name={pdfName}
+          onClose={() => {
+            setShowPdfViewer(false);
+            setPdfUrl(null);
+          }} 
+        />
       )}
     </div>
   );

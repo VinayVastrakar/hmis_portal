@@ -20,7 +20,10 @@ export const ENDPOINTS = {
     GET_ALL_HOSPITALS: '/master/hospitalResponse/getAll/1',
   },
   APPOINTMENTS: {
-    HISTORY_LIST: '/mobileController/getAppointmentHistoryList'
+    HISTORY_LIST: '/mobileController/getAppointmentHistoryList',
+    OPD_REPORTS_LIST: '/opd/getOpdReportsList',
+    OPD_PRESCRIPTION_SLIP: '/report/opdPrescriptionSlip',
+    OPD_CASE_SHEET_REPORT: '/report/opdCaseSheetReport',
   },
   // USERS: {
   //   PROFILE: '/users/profile',
