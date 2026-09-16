@@ -70,5 +70,39 @@ export const apiService = {
       method: 'DELETE',
       ...options,
     });
+  },
+
+  /**
+   * Perform a GET request to fetch a PDF or Blob
+   * @param {string} endpoint - The endpoint URL
+   * @param {object} options - Optional configuration
+   */
+  getPdf: async (endpoint, options = {}) => {
+    const { requireAuth = true, ...restOptions } = options;
+    const { API_BASE_URL } = await import('../constants/apiEndpoints');
+    
+    const headers = {
+      'Accept': 'application/pdf',
+      ...restOptions.headers,
+    };
+
+    if (requireAuth) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'GET',
+      ...restOptions,
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+    }
+
+    return await response.blob();
   }
 };
