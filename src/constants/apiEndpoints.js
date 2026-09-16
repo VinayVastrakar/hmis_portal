@@ -5,10 +5,10 @@
  * Using this prevents hardcoded strings throughout the application.
  */
 
-// const base_url= 'http://localhost:8080';
-const base_url= 'https://api.arigenhmis.com/hims';
+const base_url = 'http://localhost:8080';
+// const base_url= 'https://api.arigenhmis.com/hims';
 
-export const API_BASE_URL = import.meta.env.HIMS_API_BASE_URL || base_url;
+export const API_BASE_URL = import.meta.env.VITE_HIMS_API_BASE_URL || base_url;
 
 export const ENDPOINTS = {
   AUTH: {
