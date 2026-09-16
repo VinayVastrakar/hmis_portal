@@ -16,12 +16,10 @@ export default function BookAppointment({ defaultView = 'listing' }) {
       degrees: 'MBBS, MS (Otorhinolaryngology), DNB',
       location: 'Health Care Center, Noida',
       rating: 4.9,
-      reviewsCount: 188,
       fee: 1100,
       avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'male',
       experience: '15 Years Experience',
-      availableTypes: ['in-person', 'video'],
       about: 'Dr. Rajeshwar Singhal is a distinguished Otorhinolaryngologist specializing in advanced endoscopic sinus surgery, micro-ear reconstruction, pediatric airway issues, and allergy-induced breathing disorders.',
       expertise: [
         'Endoscopic Sinus Surgery (FESS)',
@@ -48,12 +46,10 @@ export default function BookAppointment({ defaultView = 'listing' }) {
       degrees: 'MBBS, MD (Medicine), DM (Cardiology), FACC',
       location: 'ARI Hospital, Delhi',
       rating: 4.9,
-      reviewsCount: 245,
       fee: 1500,
       avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'female',
       experience: '18 Years Experience',
-      availableTypes: ['in-person', 'video'],
       about: 'Dr. Ananya Mukherjee is a renowned senior interventional cardiologist with deep expertise in non-invasive clinical cardiology, transradial angioplasty, heart failure therapies, and advanced 3D echocardiography.',
       expertise: [
         'Coronary Angioplasty & Stenting',
@@ -80,12 +76,10 @@ export default function BookAppointment({ defaultView = 'listing' }) {
       degrees: 'MBBS, MD (Dermatology, Venereology & Leprosy)',
       location: 'Skin Care Clinic, Mumbai',
       rating: 4.8,
-      reviewsCount: 162,
       fee: 950,
       avatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'male',
       experience: '11 Years Experience',
-      availableTypes: ['in-person', 'video'],
       about: 'Dr. Vikramaditya Rathore is an expert consultant dermatologist specializing in clinical dermatology, targeted laser procedures, PRP hair restoration therapy, and biologics for chronic autoimmune skin conditions.',
       expertise: [
         'Clinical Dermatology & Eczema',
@@ -110,12 +104,10 @@ export default function BookAppointment({ defaultView = 'listing' }) {
       degrees: 'MBBS, MD (General Medicine), Dip. Diabetology',
       location: 'Noida',
       rating: 4.8,
-      reviewsCount: 310,
       fee: 650,
       avatar: 'https://images.unsplash.com/photo-1594824813686-25f0e1f7c1d7?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'female',
       experience: '14 Years Experience',
-      availableTypes: ['in-person', 'video'],
       about: 'Dr. Meenakshi Sundaram is an accomplished physician focused on comprehensive adult medicine, diabetes reversal protocols, chronic lifestyle disorders, and infectious disease management.',
       expertise: [
         'Type 2 Diabetes & Insulin Therapy',
@@ -142,12 +134,10 @@ export default function BookAppointment({ defaultView = 'listing' }) {
       degrees: 'MBBS, MS (Orthopaedics), MCh (Ortho, UK)',
       location: 'City Hospital, Delhi',
       rating: 4.9,
-      reviewsCount: 218,
       fee: 1250,
       avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400&h=400',
       gender: 'male',
       experience: '20 Years Experience',
-      availableTypes: ['in-person'],
       about: 'Dr. Harpreet Singh Anand is a senior orthopedic surgeon internationally recognized for robotic total joint replacements, arthroscopic sports surgeries, and spinal reconstructive procedures.',
       expertise: [
         'Robotic Knee & Hip Arthroplasty',
@@ -176,13 +166,11 @@ export default function BookAppointment({ defaultView = 'listing' }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [consultationType, setConsultationType] = useState('in-person');
 
   // Booking details state
   const [selectedDate, setSelectedDate] = useState('Tue, 16 Sep');
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('10:30 AM');
   const [selectedPatient, setSelectedPatient] = useState('Rahul Verma (Self)');
-  const [reasonForVisit, setReasonForVisit] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [confirmedPaymentType, setConfirmedPaymentType] = useState('Pay Now');
 
@@ -210,8 +198,7 @@ export default function BookAppointment({ defaultView = 'listing' }) {
       doc.location.toLowerCase().includes(q);
     const matchesSpecialty = !selectedSpecialty || doc.specialty === selectedSpecialty;
     const matchesLocation = !selectedLocation || doc.location.includes(selectedLocation);
-    const matchesType = !consultationType || doc.availableTypes.includes(consultationType);
-    return matchesSearch && matchesSpecialty && matchesLocation && matchesType;
+    return matchesSearch && matchesSpecialty && matchesLocation;
   });
 
   const handleSelectDoctorForBooking = (doc) => {
@@ -288,34 +275,6 @@ export default function BookAppointment({ defaultView = 'listing' }) {
                   </select>
                 </div>
 
-                {/* Consultation Type Radio */}
-                <div className="find-doctor-group">
-                  <label className="find-doctor-label">Consultation Type</label>
-                  <div className="consultation-radio-group">
-                    <label className="consultation-radio-item">
-                      <input
-                        type="radio"
-                        name="consultationType"
-                        className="consultation-radio-input"
-                        checked={consultationType === 'in-person'}
-                        onChange={() => setConsultationType('in-person')}
-                      />
-                      <span className="consultation-radio-text">In-Person</span>
-                    </label>
-
-                    <label className="consultation-radio-item">
-                      <input
-                        type="radio"
-                        name="consultationType"
-                        className="consultation-radio-input"
-                        checked={consultationType === 'video'}
-                        onChange={() => setConsultationType('video')}
-                      />
-                      <span className="consultation-radio-text">Video Consultation</span>
-                    </label>
-                  </div>
-                </div>
-
                 {/* Search Button */}
                 <button
                   type="button"
@@ -326,7 +285,7 @@ export default function BookAppointment({ defaultView = 'listing' }) {
                 </button>
 
                 {/* Clear filters if any filter is active */}
-                {(searchQuery || selectedSpecialty || selectedLocation || consultationType !== 'in-person') && (
+                {(searchQuery || selectedSpecialty || selectedLocation) && (
                   <button
                     type="button"
                     className="btn-reset-filters"
@@ -334,7 +293,6 @@ export default function BookAppointment({ defaultView = 'listing' }) {
                       setSearchQuery('');
                       setSelectedSpecialty('');
                       setSelectedLocation('');
-                      setConsultationType('in-person');
                     }}
                     style={{
                       width: '100%',
@@ -374,7 +332,6 @@ export default function BookAppointment({ defaultView = 'listing' }) {
                       setSearchQuery('');
                       setSelectedSpecialty('');
                       setSelectedLocation('');
-                      setConsultationType('in-person');
                     }}
                   >
                     Clear all filters
@@ -403,11 +360,7 @@ export default function BookAppointment({ defaultView = 'listing' }) {
                         <p className="doctor-location-text">
                           <i className="fas fa-map-marker-alt text-muted"></i> {doc.location} • {doc.experience}
                         </p>
-                        <div className="doctor-rating-row">
-                          <span className="doctor-rating-star">★</span>
-                          <span className="doctor-rating-score">{doc.rating}</span>
-                          <span className="doctor-reviews-count">({doc.reviewsCount} reviews)</span>
-                        </div>
+                    
                       </div>
                     </div>
 
@@ -547,11 +500,6 @@ export default function BookAppointment({ defaultView = 'listing' }) {
                             <i className="fa-solid fa-briefcase text-primary small"></i>
                             <span>{selectedDoctor.experience}</span>
                           </div>
-                          <div className="d-flex align-items-center gap-1">
-                            <i className="fa-solid fa-star text-warning"></i>
-                            <strong className="text-dark">{selectedDoctor.rating}</strong>
-                            <span className="text-muted">({selectedDoctor.reviewsCount} reviews)</span>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -569,13 +517,13 @@ export default function BookAppointment({ defaultView = 'listing' }) {
                         </div>
                       </div>
 
-                      {/* Consultation Type */}
+                      {/* Location */}
                       <div className="col-6">
                         <div className="d-flex align-items-start gap-2">
-                          <i className="fa-solid fa-stethoscope text-primary mt-1"></i>
+                          <i className="fa-solid fa-location-dot text-primary mt-1"></i>
                           <div>
-                            <span className="text-muted small d-block" style={{ fontSize: '0.78rem' }}>Consultation Type</span>
-                            <strong className="text-dark small">In-Person, Video Consultation</strong>
+                            <span className="text-muted small d-block" style={{ fontSize: '0.78rem' }}>Location</span>
+                            <strong className="text-dark small">{selectedDoctor.location}</strong>
                           </div>
                         </div>
                       </div>
@@ -604,17 +552,6 @@ export default function BookAppointment({ defaultView = 'listing' }) {
                           <div>
                             <span className="text-muted small d-block" style={{ fontSize: '0.78rem' }}>Consultation Fee</span>
                             <h5 className="fw-bold text-dark mb-0">₹{selectedDoctor.fee.toLocaleString()}</h5>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Location */}
-                      <div className="col-6">
-                        <div className="d-flex align-items-start gap-2">
-                          <i className="fa-solid fa-location-dot text-primary mt-1"></i>
-                          <div>
-                            <span className="text-muted small d-block" style={{ fontSize: '0.78rem' }}>Location</span>
-                            <strong className="text-dark small">{selectedDoctor.location}</strong>
                           </div>
                         </div>
                       </div>
@@ -796,23 +733,6 @@ export default function BookAppointment({ defaultView = 'listing' }) {
                           <span className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Mobile Number</span>
                           <strong className="text-dark">+91 98102 34567</strong>
                         </div>
-                      </div>
-
-                      {/* Reason for Visit (Optional) */}
-                      <div className="mb-3">
-                        <div className="d-flex justify-content-between">
-                          <label className="form-label small text-muted mb-1">Reason for Visit (Optional)</label>
-                          <span className="small text-muted">{reasonForVisit.length}/200</span>
-                        </div>
-                        <input
-                          type="text"
-                          maxLength={200}
-                          className="form-control form-control-sm"
-                          placeholder="e.g. Ear pain, hearing issue, follow up, etc."
-                          value={reasonForVisit}
-                          onChange={(e) => setReasonForVisit(e.target.value)}
-                          style={{ fontSize: '0.88rem' }}
-                        />
                       </div>
 
                       <hr className="my-3 border-light-subtle" />
