@@ -24,10 +24,14 @@ export const ENDPOINTS = {
     OPD_REPORTS_LIST: '/opd/getOpdReportsList',
     OPD_PRESCRIPTION_SLIP: '/report/opdPrescriptionSlip',
     OPD_CASE_SHEET_REPORT: '/report/opdCaseSheetReport',
+    CANCELLED_REFUND_LIST: '/mobileController/getCancelledRefundAppointments',
   },
   // USERS: {
   //   PROFILE: '/users/profile',
   //   UPDATE: '/users/update',
   // },
+  BILLING: {
+    REFUND_DETAILS: '/billing/refundDetails',
+  },
   // Add other modules here like PATIENTS, DOCTORS, APPOINTMENTS etc.
 };
