@@ -18,6 +18,8 @@ export default function MyAppointments() {
   // Modal States
   const [modalType, setModalType] = useState(null); // 'pay', 'reschedule', 'cancel', 'invoice', 'details', 'report', 'book-radiology', 'book-lab'
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [refundDetailsData, setRefundDetailsData] = useState(null);
+  const [loadingRefundDetails, setLoadingRefundDetails] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [pdfName, setPdfName] = useState('');
@@ -137,6 +139,59 @@ export default function MyAppointments() {
             });
             setPastAppointments(mapped);
           }
+        } else if (activeSubTab === 'cancelled') {
+          const queryParams = new URLSearchParams({
+            hospitalId: parsedHospital.id,
+            patientId: parsedPatient.patientId,
+            departmentType: deptCode,
+            page: 0,
+            size: 10
+          });
+          
+          const response = await apiService.get(`${ENDPOINTS.APPOINTMENTS.CANCELLED_REFUND_LIST}?${queryParams.toString()}`);
+          
+          if (response.status === 200 && response.response && response.response.content) {
+            const mapped = response.response.content.map(app => {
+              let when = app.appointmentDate || 'N/A';
+              let time = app.appointmentTime && app.appointmentTime !== ' to ' ? app.appointmentTime : 'N/A';
+              
+              const isDiagnostic = app.departmentName?.toLowerCase().includes('lab') || app.departmentName?.toLowerCase().includes('rad') || app.departmentName === 'Laboratory' || app.departmentName === 'Radiology';
+              
+              return {
+                id: app.visitId,
+                date: when,
+                dayTime: time,
+                doctor: app.doctorName || 'Not Assigned',
+                specialty: app.departmentName,
+                testName: app.doctorName ? '' : (app.departmentName || 'Diagnostic Test'),
+                department: app.departmentName,
+                hospital: parsedHospital.hospitalName,
+                location: parsedHospital.hospitalName,
+                room: 'Room Not Assigned',
+                tokenNo: '-',
+                paymentStatus: app.refundDate ? 'Refund Complete' : (app.refundStatus ? app.refundStatus : 'Refund Pending'),
+                amount: app.billingAmount || 0,
+                status: isDiagnostic ? 'Cancelled' : 'cancelled',
+                type: app.departmentName?.toLowerCase().includes('lab') || app.departmentName === 'Laboratory' ? 'lab' : (app.departmentName?.toLowerCase().includes('rad') || app.departmentName === 'Radiology' ? 'radiology' : 'opd'),
+                cancellationDateTime: app.cancellationDateTime,
+                cancelledBy: app.cancelledBy,
+                cancellationReason: app.cancellationReason,
+                refundId: app.refundId,
+                refundDate: app.refundDate
+              };
+            });
+            
+            if (deptCode === 'OPD') {
+               setPastAppointments(mapped);
+            } else if (deptCode === 'LAB') {
+               setLabAppointments(mapped);
+            } else if (deptCode === 'RAD') {
+               setRadiologyAppointments(mapped);
+            } else {
+               setLabAppointments(mapped.filter(a => a.type === 'lab'));
+               setRadiologyAppointments(mapped.filter(a => a.type === 'radiology'));
+            }
+          }
         } else {
           const paramsObj = {
             hospitalId: parsedHospital.id,
@@ -146,12 +201,10 @@ export default function MyAppointments() {
           };
           const queryParams = new URLSearchParams(paramsObj);
           
-          if (activeMenu === 'opd') {
-            if (activeSubTab === 'upcoming') {
-              queryParams.append('visitStatus', 'n');
-            } else if (activeSubTab === 'cancelled') {
-              queryParams.append('visitStatus', 'c');
-            }
+          if (activeSubTab === 'upcoming') {
+            queryParams.append('visitStatus', 'n');
+          } else if (activeSubTab === 'completed' && activeMenu !== 'opd') {
+            queryParams.append('visitStatus', 'y');
           }
           
           const response = await apiService.get(`${ENDPOINTS.APPOINTMENTS.HISTORY_LIST}?${queryParams.toString()}`);
@@ -405,9 +458,26 @@ export default function MyAppointments() {
     setModalType('report');
   };
 
-  const handleOpenDetails = (app) => {
+  const handleOpenDetails = async (app) => {
     setSelectedAppointment(app);
+    setRefundDetailsData(null);
     setModalType('details');
+
+    if (app.status === 'Cancelled' || app.status === 'cancelled') {
+      if (app.refundId) {
+        setLoadingRefundDetails(true);
+        try {
+          const response = await apiService.get(`${ENDPOINTS.BILLING.REFUND_DETAILS}/${app.refundId}`);
+          if (response.status === 200 && response.response) {
+            setRefundDetailsData(response.response);
+          }
+        } catch (error) {
+          console.error("Failed to fetch refund details:", error);
+        } finally {
+          setLoadingRefundDetails(false);
+        }
+      }
+    }
   };
 
   const handleOpenBookModal = (type) => {
@@ -573,8 +643,10 @@ export default function MyAppointments() {
                     <div className="table-payment-cell">
                       {app.paymentStatus === 'Paid' ? (
                         <span className="payment-badge payment-badge-paid">Paid</span>
-                      ) : (
+                      ) : app.paymentStatus === 'Pending' ? (
                         <span className="payment-badge payment-badge-pending">Pending</span>
+                      ) : (
+                        <span className={`payment-badge ${app.paymentStatus === 'Refund Complete' || app.paymentStatus === 'Refunded' ? 'bg-info text-white border-0' : 'bg-warning text-dark border-0'}`}>{app.paymentStatus}</span>
                       )}
                       <span className="payment-amount">₹{app.amount.toLocaleString()}</span>
                     </div>
@@ -778,8 +850,10 @@ export default function MyAppointments() {
                     <div className="table-payment-cell">
                       {app.paymentStatus === 'Paid' ? (
                         <span className="payment-badge payment-badge-paid">Paid</span>
-                      ) : (
+                      ) : app.paymentStatus === 'Pending' ? (
                         <span className="payment-badge payment-badge-pending">Pending</span>
+                      ) : (
+                        <span className={`payment-badge ${app.paymentStatus === 'Refund Complete' || app.paymentStatus === 'Refunded' ? 'bg-info text-white border-0' : 'bg-warning text-dark border-0'}`}>{app.paymentStatus}</span>
                       )}
                       <span className="payment-amount">₹{app.amount.toLocaleString()}</span>
                     </div>
@@ -1218,8 +1292,14 @@ export default function MyAppointments() {
                                 </td>
                                 <td>
                                   <div className="table-payment-cell">
-                                    <span className="payment-badge payment-badge-paid">Paid</span>
-                                    <span className="payment-amount">₹{app.amount}</span>
+                                    {app.paymentStatus === 'Paid' ? (
+                                      <span className="payment-badge payment-badge-paid">Paid</span>
+                                    ) : app.paymentStatus === 'Pending' ? (
+                                      <span className="payment-badge payment-badge-pending">Pending</span>
+                                    ) : (
+                                      <span className={`payment-badge ${app.paymentStatus === 'Refund Complete' || app.paymentStatus === 'Refunded' ? 'bg-info text-white border-0' : 'bg-warning text-dark border-0'}`}>{app.paymentStatus}</span>
+                                    )}
+                                    <span className="payment-amount">₹{app.amount.toLocaleString ? app.amount.toLocaleString() : app.amount}</span>
                                   </div>
                                 </td>
                                 <td>
@@ -1307,7 +1387,32 @@ export default function MyAppointments() {
                       View, manage and take action on your radiology appointments.
                     </p>
                   </div>
-                
+                  <div className="appointment-subtabs">
+                    <button
+                      className={`subtab-btn ${activeSubTab === 'upcoming' ? 'active' : ''}`}
+                      onClick={() => setActiveSubTab('upcoming')}
+                      type="button"
+                    >
+                      <i className="fas fa-calendar-alt"></i>
+                      Pending
+                    </button>
+                    <button
+                      className={`subtab-btn ${activeSubTab === 'completed' ? 'active' : ''}`}
+                      onClick={() => setActiveSubTab('completed')}
+                      type="button"
+                    >
+                      <i className="fas fa-check-circle"></i>
+                      Completed
+                    </button>
+                    <button
+                      className={`subtab-btn ${activeSubTab === 'cancelled' ? 'active' : ''}`}
+                      onClick={() => setActiveSubTab('cancelled')}
+                      type="button"
+                    >
+                      <i className="fas fa-ban"></i>
+                      Cancelled
+                    </button>
+                  </div>
                 </div>
 
                 {/* Primary Card: Radiology Card (Lavender Banner) */}
@@ -1329,7 +1434,32 @@ export default function MyAppointments() {
                       View, manage and take action on your lab test appointments.
                     </p>
                   </div>
-                 
+                  <div className="appointment-subtabs">
+                    <button
+                      className={`subtab-btn ${activeSubTab === 'upcoming' ? 'active' : ''}`}
+                      onClick={() => setActiveSubTab('upcoming')}
+                      type="button"
+                    >
+                      <i className="fas fa-calendar-alt"></i>
+                      Pending
+                    </button>
+                    <button
+                      className={`subtab-btn ${activeSubTab === 'completed' ? 'active' : ''}`}
+                      onClick={() => setActiveSubTab('completed')}
+                      type="button"
+                    >
+                      <i className="fas fa-check-circle"></i>
+                      Completed
+                    </button>
+                    <button
+                      className={`subtab-btn ${activeSubTab === 'cancelled' ? 'active' : ''}`}
+                      onClick={() => setActiveSubTab('cancelled')}
+                      type="button"
+                    >
+                      <i className="fas fa-ban"></i>
+                      Cancelled
+                    </button>
+                  </div>
                 </div>
 
                 {/* Primary Card: Lab Card (Mint Green Banner) */}
@@ -1941,9 +2071,57 @@ export default function MyAppointments() {
                 </div>
               </div>
 
-              {selectedAppointment.status === 'Cancelled' && (
+              {(selectedAppointment.status === 'Cancelled' || selectedAppointment.status === 'cancelled') && (
                 <div className="alert alert-warning small mb-0">
                   <i className="fas fa-info-circle me-1"></i> This appointment was cancelled. If you still need medical attention, please book a new test or contact hospital support.
+                  {selectedAppointment.cancellationDateTime && (
+                    <div className="mt-2">
+                      <strong>Cancelled On:</strong> {new Date(selectedAppointment.cancellationDateTime).toLocaleString()} <br />
+                      <strong>Cancelled By:</strong> {selectedAppointment.cancelledBy || 'N/A'} <br />
+                      <strong>Reason:</strong> {selectedAppointment.cancellationReason || 'N/A'}
+                    </div>
+                  )}
+
+                  {selectedAppointment.refundDate && selectedAppointment.refundId && (
+                    <div className="mt-3 pt-3 border-top border-warning">
+                      <h6 className="fw-bold mb-2 text-dark"><i className="fas fa-receipt me-1"></i> Gateway Refund Details</h6>
+                      {loadingRefundDetails ? (
+                        <div className="d-flex align-items-center text-muted">
+                          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                          Loading refund details...
+                        </div>
+                      ) : refundDetailsData ? (
+                        <div className="row g-2 mt-2">
+                          <div className="col-12 col-md-6">
+                            <span className="text-muted">Gateway Refund ID:</span><br/><strong className="text-dark">{refundDetailsData.gatewayRefundId}</strong>
+                          </div>
+                          <div className="col-12 col-md-6">
+                            <span className="text-muted">Refund Amount:</span><br/><strong className="text-dark">₹{refundDetailsData.refundAmount}</strong>
+                          </div>
+                          <div className="col-12 col-md-6">
+                            <span className="text-muted">Refund Reason:</span><br/><strong className="text-dark">{refundDetailsData.refundReason || 'N/A'}</strong>
+                          </div>
+                          <div className="col-12 col-md-6">
+                            <span className="text-muted">Payment Amount:</span><br/><strong className="text-dark">₹{refundDetailsData.paymentAmount}</strong>
+                          </div>
+                          <div className="col-12 col-md-6">
+                            <span className="text-muted">Initiated On:</span><br/><strong className="text-dark">{new Date(refundDetailsData.initiatedOn).toLocaleString()}</strong>
+                          </div>
+                          <div className="col-12 col-md-6">
+                            <span className="text-muted">Gateway Payment ID:</span><br/><strong className="text-dark">{refundDetailsData.gatewayPaymentId}</strong>
+                          </div>
+                          <div className="col-12 col-md-6">
+                            <span className="text-muted">Payment Mode:</span><br/><strong className="text-dark">{refundDetailsData.paymentMode}</strong>
+                          </div>
+                          <div className="col-12 col-md-6">
+                            <span className="text-muted">Payment Via:</span><br/><strong className="text-dark">{refundDetailsData.paymentVia}</strong>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-muted mt-2">Refund details not available.</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
